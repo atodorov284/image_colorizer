@@ -1,1 +1,4 @@
 data/
+.venv
+.ruff_cache
+__pycache__
