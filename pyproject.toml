@@ -14,7 +14,9 @@ dependencies = [
     "matplotlib>=3.10.1",
     "opencv-python>=4.11.0.86",
     "pandas>=2.2.3",
+    "polars>=1.27.1",
     "pycocotools>=2.0.8",
+    "scikit-image>=0.25.2",
     "seaborn>=0.13.2",
     "torch>=2.6.0",
     "torchvision>=0.21.0",
@@ -22,4 +24,4 @@ dependencies = [
 
 [tool.ruff.lint]
 select = ["E", "F", "ANN", "D", "F", "I"]
-ignore = ["ANN101","ANN102","D100", "D101","D2","D4","ANN002","ANN003", "E501", "ANN401", "D104", "I001"]
+ignore = ["D100", "D101","D2","D4","ANN002","ANN003", "E501", "ANN401", "D104", "I001"]
