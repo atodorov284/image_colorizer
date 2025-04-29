@@ -26,7 +26,6 @@ class ColorizationPipeline(BasePipeline):
         device : torch.device
             Device to use for training.
         """
-        # Pass the specific model instance (ResNet or ViT)
         super().__init__(config, model, device)
         self.setup_loaders()
         self.setup_optimizer_criterion()
@@ -35,7 +34,6 @@ class ColorizationPipeline(BasePipeline):
         """
         Sets up the data loaders.
         """
-        # Use config for paths, batch size, image size etc.
         full_dataset = ColorizationDataset(
             root_dir=self.config["data"]["train_dir"],
             target_size=tuple(self.config["data"]["image_size"]),
@@ -53,7 +51,7 @@ class ColorizationPipeline(BasePipeline):
         """
         Sets up the optimizer and criterion.
         """
-        self.criterion = nn.MSELoss()  # Or other appropriate loss
+        self.criterion = nn.MSELoss()
         self.optimizer = optim.Adam(
             self.model.parameters(), lr=self.config["training"]["learning_rate"]
         )
@@ -81,7 +79,7 @@ class ColorizationPipeline(BasePipeline):
         for inputs, targets in progress_bar:
             inputs, targets = inputs.to(self.device), targets.to(self.device)
             self.optimizer.zero_grad()
-            outputs = self.model(inputs)  # Uses the passed model (ResNet or ViT)
+            outputs = self.model(inputs)
             loss = self.criterion(outputs, targets)
             loss.backward()
             self.optimizer.step()
@@ -97,7 +95,6 @@ class ColorizationPipeline(BasePipeline):
         """
         Evaluates the model on the validation set.
         """
-        # Implement evaluation logic using self.val_loader
         print("Evaluation not implemented yet.")
         pass
 
@@ -109,7 +106,7 @@ class ColorizationPipeline(BasePipeline):
         print(f"Starting training for {num_epochs} epochs...")
         for epoch in range(1, num_epochs + 1):
             self.train_epoch(epoch)
-            # Optional: self.evaluate()
+            # self.evaluate()
         print("Training finished.")
 
     @torch.no_grad()
