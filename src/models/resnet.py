@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 from torchvision.models import ResNet18_Weights, resnet18
 
-from .base_model import BaseColorizationModel  # Relative import
+from models.base_model import BaseColorizationModel
 
 
 class ResNetColorizationModel(BaseColorizationModel):
