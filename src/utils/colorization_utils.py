@@ -1,12 +1,9 @@
-import os
 from typing import Tuple
 
-import matplotlib.pyplot as plt
 import numpy as np
 import torch
 from PIL import Image
 from skimage import color
-from torch.utils.data import DataLoader, Dataset
 from torchvision import transforms
 
 
@@ -97,98 +94,3 @@ class ColorizationUtils:
         )  # Output shape (H, W, 3), float range [0, 1]
 
         return rgb_reconstructed_float
-
-
-class ColorizationDataset(Dataset):
-    """
-    PyTorch Dataset for loading and preprocessing images for colorization.
-
-    Args:
-        root_dir (str): Path to the directory containing images.
-        target_size (Tuple[int, int], optional): Target size (height, width)
-                                                 for resizing images. Defaults to (256, 256).
-    """
-
-    def __init__(
-        self, root_dir: str, target_size: Tuple[int, int] = (256, 256)
-    ) -> None:
-        """Constructor for ColorizationDataset."""
-        self.root_dir: str = root_dir
-        self.target_size: Tuple[int, int] = target_size
-        self.image_files: list[str] = [
-            f for f in os.listdir(root_dir) if os.path.isfile(os.path.join(root_dir, f))
-        ]
-
-    def __len__(self) -> int:
-        """Returns the total number of images in the dataset."""
-        return len(self.image_files)
-
-    def __getitem__(self, idx: int) -> Tuple[torch.Tensor, torch.Tensor]:
-        """
-        Loads, resizes, and preprocesses a single image from the dataset.
-
-        Args:
-            idx (int): Index of the image to retrieve.
-
-        Returns:
-            Tuple[torch.Tensor, torch.Tensor]: Input (LLL) and Target (AB) tensors.
-        """
-        img_path: str = os.path.join(self.root_dir, self.image_files[idx])
-        img_rgb_pil: Image.Image = Image.open(img_path).convert("RGB")
-        input_tensor, output_tensor = ColorizationUtils.preprocess_image(
-            img_rgb_pil, self.target_size
-        )
-        return input_tensor, output_tensor
-
-
-if __name__ == "__main__":
-    data_folder: str = "data"
-    train_dir: str = os.path.join(data_folder, "train2017")
-
-    TARGET_IMAGE_SIZE: Tuple[int, int] = (256, 256)
-    BATCH_SIZE: int = 32
-
-    print(f"Creating dataset from: {train_dir}")
-    train_dataset: ColorizationDataset = ColorizationDataset(
-        root_dir=train_dir, target_size=TARGET_IMAGE_SIZE
-    )
-
-    train_loader: DataLoader = DataLoader(
-        train_dataset, batch_size=BATCH_SIZE, shuffle=True
-    )
-    print(f"\nTotal training images found: {len(train_dataset)}")
-
-    print("\nIterating through DataLoader (first batch):")
-    for i, (inputs, targets) in enumerate(train_loader):
-        print(f"Batch {i + 1}")
-        print(f"  Input batch shape: {inputs.shape}")
-        print(f"  Target batch shape: {targets.shape}")
-
-        if i == 0:
-            reconstructed_rgb_image: np.ndarray = ColorizationUtils.reconstruct_image(
-                inputs[0], targets[0]
-            )
-
-            input_display: np.ndarray = (
-                inputs[0].detach().cpu().permute(1, 2, 0).numpy()
-            )
-
-            print(f"  Input display shape: {input_display.shape}")
-            print(f"  Reconstructed RGB shape: {reconstructed_rgb_image.shape}")
-
-            plt.figure(figsize=(10, 5))
-            plt.subplot(1, 2, 1)
-            plt.imshow(input_display)
-            plt.title("Input Grayscale (L channel)")
-            plt.axis("off")
-
-            plt.subplot(1, 2, 2)
-            plt.imshow(reconstructed_rgb_image)
-            plt.title("Reconstructed Color Image")
-            plt.axis("off")
-
-            plt.suptitle(f"Reconstruction Example (Batch {i + 1}, Item 0)")
-            plt.tight_layout()
-            plt.show()
-
-            break
