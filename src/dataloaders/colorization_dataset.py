@@ -6,7 +6,10 @@ from PIL import Image
 from torch.utils.data import Dataset
 
 from utils.colorization_utils import ColorizationUtils
+from utils.filtering_utils import FiltersUtils
 
+from tqdm import tqdm
+from pycocotools.coco import COCO
 
 class ColorizationDataset(Dataset):
     """
@@ -19,14 +22,33 @@ class ColorizationDataset(Dataset):
     """
 
     def __init__(
-        self, root_dir: str, target_size: Tuple[int, int] = (256, 256)
+        self, root_dir: str, captions_dir:str, target_size: Tuple[int, int] = (256, 256)
     ) -> None:
         """Constructor for ColorizationDataset."""
         self.root_dir: str = root_dir
         self.target_size: Tuple[int, int] = target_size
-        self.image_files: list[str] = [
+        all_image_files: list[str] = [
             f for f in os.listdir(root_dir) if os.path.isfile(os.path.join(root_dir, f))
         ]
+        self.image_files: list[str] = []
+        print(f"Found {len(all_image_files)} images before filtering.")
+
+        coco = COCO(captions_dir)
+
+        for file_name in tqdm(all_image_files, desc="Filtering images"):
+            img_path = os.path.join(self.root_dir, file_name)
+
+            should_filter = False
+            if FiltersUtils.channel_difference_test(img_path):
+                should_filter = True
+
+            if FiltersUtils.caption_keywords_test(img_path, coco):
+                should_filter = True
+            
+            if not should_filter:
+                self.image_files.append(file_name)
+
+        print(f"Keeping {len(self.image_files)} images after filtering. {len(all_image_files) - len(self.image_files)} images filtered out.")
 
     def __len__(self) -> int:
         """Returns the total number of images in the dataset."""

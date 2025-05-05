@@ -1,5 +1,6 @@
 data:
   train_dir: ./data/train2017
+  captions_dir: ./data/annotations/captions_train2017.json
   image_size:
     - 256
     - 256

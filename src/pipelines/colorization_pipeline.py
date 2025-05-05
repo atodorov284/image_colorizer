@@ -36,6 +36,7 @@ class ColorizationPipeline(BasePipeline):
         """
         full_dataset = ColorizationDataset(
             root_dir=self.config["data"]["train_dir"],
+            captions_dir=self.config["data"]["captions_dir"],
             target_size=tuple(self.config["data"]["image_size"]),
         )
         self.train_loader = DataLoader(
