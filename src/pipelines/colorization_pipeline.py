@@ -8,6 +8,7 @@ from datetime import datetime
 
 from dataloaders.colorization_dataset import ColorizationDataset
 from pipelines.base_pipeline import BasePipeline
+from utils.early_stopping import EarlyStopping
 
 
 class ColorizationPipeline(BasePipeline):
@@ -31,8 +32,13 @@ class ColorizationPipeline(BasePipeline):
         super().__init__(config, model, device)
         self.setup_loaders()
         self.setup_optimizer_criterion()
+
         self.checkpoint_dir = self.config["output"]["checkpoint_dir"]
         os.makedirs(self.checkpoint_dir, exist_ok=True)
+        self.best_model_dir = self.config["output"]["best_model_dir"]
+        os.makedirs(self.best_model_dir, exist_ok=True)
+
+        self.early_stopping = EarlyStopping(patience=self.config["training"]["patience"], min_delta=self.config["training"]["min_delta"])
 
     def setup_loaders(self) -> None:
         """
@@ -104,22 +110,6 @@ class ColorizationPipeline(BasePipeline):
         avg_epoch_loss = epoch_loss / num_batches if num_batches > 0 else 0.0
         print(f"Epoch {epoch_num} Average Loss: {avg_epoch_loss:.6f}")
 
-        val_loss = self.evaluate()
-
-        # Save model checkpoint
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        checkpoint = {
-            'epoch': epoch_num,
-            'model_state_dict': self.model.state_dict(),
-            'optimizer_state_dict': self.optimizer.state_dict(),
-            'train_loss': avg_epoch_loss,
-            'val_loss': val_loss,
-            'timestamp': timestamp
-        }
-        ckpt_name = f"epoch_{epoch_num:03d}_{timestamp}.pth"
-        ckpt_path = os.path.join(self.checkpoint_dir, ckpt_name)
-        torch.save(checkpoint, ckpt_path)
-        print(f"Saved checkpoint: {ckpt_path}")
         return avg_epoch_loss
 
     def evaluate(self) -> None:
@@ -145,13 +135,39 @@ class ColorizationPipeline(BasePipeline):
 
     def run_training(self) -> None:
         """
-        Runs the full training loop.
+        Runs the full training loop with early stopping.
         """
         num_epochs = self.config["training"]["num_epochs"]
         print(f"Starting training for {num_epochs} epochs...")
+
+        start_time = datetime.now()
         for epoch in range(1, num_epochs + 1):
-            self.train_epoch(epoch)
-            # self.evaluate()
+            train_loss = self.train_epoch(epoch)
+            val_loss = self.evaluate()
+            end_time = datetime.now()
+            checkpoint = {
+            'epoch': epoch,
+            'model_state_dict': self.model.state_dict(),
+            'optimizer_state_dict': self.optimizer.state_dict(),
+            'train_loss': train_loss,
+            'val_loss': val_loss,
+            'wall_time': (end_time - start_time).total_seconds()
+            }
+            ckpt_name = f"resnet_epoch_{epoch:03d}.pth"
+            ckpt_path = os.path.join(self.checkpoint_dir, ckpt_name)
+            torch.save(checkpoint, ckpt_path)
+
+            # Early stopping check
+            if self.early_stopping(val_loss, self.model):
+                print(f"Early stopping triggered at epoch {epoch}. Restoring best model weights.")
+                self.early_stopping.restore_best_weights(self.model)
+                
+                best_model_path = os.path.join(self.best_model_dir, "best_model.pth")
+                torch.save(self.model.state_dict(), best_model_path)
+                print(f"Best model saved to {best_model_path}.")
+                break
+
+
         print("Training finished.")
 
     @torch.no_grad()
