@@ -1,8 +1,10 @@
+import os
 import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
 from tqdm import tqdm
+from datetime import datetime
 
 from dataloaders.colorization_dataset import ColorizationDataset
 from pipelines.base_pipeline import BasePipeline
@@ -29,6 +31,8 @@ class ColorizationPipeline(BasePipeline):
         super().__init__(config, model, device)
         self.setup_loaders()
         self.setup_optimizer_criterion()
+        self.checkpoint_dir = self.config["output"]["checkpoint_dir"]
+        os.makedirs(self.checkpoint_dir, exist_ok=True)
 
     def setup_loaders(self) -> None:
         """
@@ -90,6 +94,20 @@ class ColorizationPipeline(BasePipeline):
 
         avg_epoch_loss = epoch_loss / num_batches if num_batches > 0 else 0.0
         print(f"Epoch {epoch_num} Average Loss: {avg_epoch_loss:.6f}")
+
+        # Save model checkpoint
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        checkpoint = {
+            'epoch': epoch_num,
+            'model_state_dict': self.model.state_dict(),
+            'optimizer_state_dict': self.optimizer.state_dict(),
+            'loss': avg_epoch_loss,
+            'timestamp': timestamp
+        }
+        ckpt_name = f"epoch_{epoch_num:03d}_{timestamp}.pth"
+        ckpt_path = os.path.join(self.checkpoint_dir, ckpt_name)
+        torch.save(checkpoint, ckpt_path)
+        print(f"Saved checkpoint: {ckpt_path}")
         return avg_epoch_loss
 
     def evaluate(self) -> None:
