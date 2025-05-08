@@ -40,7 +40,12 @@ class ColorizationPipeline(BasePipeline):
         """
         full_dataset = ColorizationDataset(
             root_dir=self.config["data"]["train_dir"],
-            captions_dir=self.config["data"]["captions_dir"],
+            captions_dir=self.config["data"]["train_captions_dir"],
+            target_size=tuple(self.config["data"]["image_size"]),
+        )
+        val_dataset = ColorizationDataset(
+            root_dir=self.config["data"]["val_dir"],
+            captions_dir=self.config["data"]["val_captions_dir"],
             target_size=tuple(self.config["data"]["image_size"]),
         )
         self.train_loader = DataLoader(
@@ -48,7 +53,11 @@ class ColorizationPipeline(BasePipeline):
             batch_size=self.config["training"]["batch_size"],
             shuffle=True,
         )
-        # self.val_loader = DataLoader(...) # Setup validation loader
+        self.val_loader = DataLoader(
+            val_dataset,
+            batch_size=self.config["training"]["batch_size"],
+            shuffle=True,
+        )
 
         print(f"Train loader setup with {len(full_dataset)} images.")
 
@@ -95,13 +104,16 @@ class ColorizationPipeline(BasePipeline):
         avg_epoch_loss = epoch_loss / num_batches if num_batches > 0 else 0.0
         print(f"Epoch {epoch_num} Average Loss: {avg_epoch_loss:.6f}")
 
+        val_loss = self.evaluate()
+
         # Save model checkpoint
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         checkpoint = {
             'epoch': epoch_num,
             'model_state_dict': self.model.state_dict(),
             'optimizer_state_dict': self.optimizer.state_dict(),
-            'loss': avg_epoch_loss,
+            'train_loss': avg_epoch_loss,
+            'val_loss': val_loss,
             'timestamp': timestamp
         }
         ckpt_name = f"epoch_{epoch_num:03d}_{timestamp}.pth"
@@ -114,8 +126,22 @@ class ColorizationPipeline(BasePipeline):
         """
         Evaluates the model on the validation set.
         """
-        print("Evaluation not implemented yet.")
-        pass
+
+        self.model.eval()
+        total_loss = 0.0
+        num_batches = 0
+
+        with torch.no_grad():
+            for inputs, targets in tqdm(self.val_loader, desc="Evaluating", leave=False):
+                inputs, targets = inputs.to(self.device), targets.to(self.device)
+                outputs = self.model(inputs)
+                loss = self.criterion(outputs, targets)
+                total_loss += loss.item()
+                num_batches += 1
+
+        avg_loss = total_loss / num_batches if num_batches > 0 else 0.0
+        print(f"Validation Average Loss: {avg_loss:.6f}")
+        return avg_loss
 
     def run_training(self) -> None:
         """
