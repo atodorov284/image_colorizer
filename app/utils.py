@@ -2,6 +2,7 @@ import base64
 import io
 import os
 from pathlib import Path
+from typing import Any, List, Optional, Tuple, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -10,16 +11,20 @@ from matplotlib.figure import Figure
 from PIL import Image, ImageOps
 
 
-def get_example_images(directory_path, limit=5):
+def get_example_images(directory_path: Union[str, Path], limit: int = 5) -> List[Path]:
     """
     Get a list of example image paths from the specified directory.
 
+    This function scans a directory for image files with common extensions and returns
+    a list of paths to these images, limited by the specified count.
+
     Args:
-        directory_path (str): Path to the directory containing images
-        limit (int): Maximum number of example images to return
+        directory_path: Path to the directory containing images
+        limit: Maximum number of example images to return
 
     Returns:
-        list: List of paths to example images
+        List[Path]: List of paths to example images, sorted alphabetically and limited
+                   to the specified count. Returns empty list if directory doesn't exist.
     """
     directory = Path(directory_path)
     if not directory.exists():
@@ -35,16 +40,20 @@ def get_example_images(directory_path, limit=5):
     return sorted(image_paths)[:limit]
 
 
-def prepare_image_display(image, size=(256, 256)):
+def prepare_image_display(
+    image: Image.Image, size: Tuple[int, int] = (256, 256)
+) -> Image.Image:
     """
-    Prepare an image for display (resize, convert)
+    Prepare an image for display by resizing it to the target dimensions.
+
+    Creates a copy of the input image and resizes it to avoid modifying the original.
 
     Args:
-        image (PIL.Image): Input image
-        size (tuple): Target size
+        image: Input PIL Image object
+        size: Target size as (width, height) tuple
 
     Returns:
-        PIL.Image: Processed image
+        Image.Image: Processed image ready for display
     """
     # Make a copy of the image to avoid modifying the original
     img_copy = image.copy()
@@ -55,17 +64,24 @@ def prepare_image_display(image, size=(256, 256)):
     return img_copy
 
 
-def create_comparison_figure(original, colorized, figsize=(10, 5)):
+def create_comparison_figure(
+    original: np.ndarray, colorized: np.ndarray, figsize: Tuple[int, int] = (10, 5)
+) -> Optional[str]:
     """
-    Create a matplotlib figure comparing original and colorized images
+    Create a matplotlib figure comparing original and colorized images.
+
+    This function creates a side-by-side comparison of the original and
+    colorized images, encodes it as a base64 string suitable for displaying
+    in HTML/web contexts.
 
     Args:
-        original (np.ndarray): Original image
-        colorized (np.ndarray): Colorized image
-        figsize (tuple): Figure size
+        original: Original image as numpy array
+        colorized: Colorized image as numpy array
+        figsize: Figure size as (width, height) tuple in inches
 
     Returns:
-        str: Base64 encoded figure
+        Optional[str]: Base64 encoded figure as a data URL string that can be used in HTML,
+                      or None if an error occurs during figure creation
     """
     try:
         fig = Figure(figsize=figsize)
@@ -93,12 +109,15 @@ def create_comparison_figure(original, colorized, figsize=(10, 5)):
         return None
 
 
-def ensure_directory_exists(path):
+def ensure_directory_exists(path: Union[str, Path]) -> None:
     """
-    Ensure that a directory exists, creating it if necessary
+    Ensure that a directory exists, creating it if necessary.
+
+    This function attempts to create the specified directory and all parent
+    directories if they don't already exist.
 
     Args:
-        path (str): Path to the directory
+        path: Path to the directory to be created
     """
     directory = Path(path)
     try:
@@ -107,16 +126,21 @@ def ensure_directory_exists(path):
         print(f"Error creating directory {path}: {e}")
 
 
-def save_uploaded_image(uploaded_file, save_dir="app/uploaded_images"):
+def save_uploaded_image(
+    uploaded_file: Any, save_dir: str = "app/uploaded_images"
+) -> Optional[str]:
     """
-    Save an uploaded image file to disk
+    Save an uploaded image file to disk.
+
+    This function saves a file uploaded through Streamlit to the specified
+    directory, creating the directory if it doesn't exist.
 
     Args:
-        uploaded_file: Streamlit uploaded file
-        save_dir (str): Directory to save the file
+        uploaded_file: Streamlit UploadedFile object containing the image data
+        save_dir: Directory path where the file should be saved
 
     Returns:
-        str: Path to the saved file
+        Optional[str]: Path to the saved file, or None if an error occurs
     """
     try:
         ensure_directory_exists(save_dir)

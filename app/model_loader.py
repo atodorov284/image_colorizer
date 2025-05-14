@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 import torch
@@ -9,20 +10,28 @@ from src.pipelines.colorization_pipeline import ColorizationPipeline
 
 
 class DummyPipeline:
-    """Dummy pipeline for when torch is not available or no model is found."""
+    """
+    Dummy pipeline that generates random colorization when a real model is not available.
 
-    def __init__(self):
+    This serves as a fallback when the actual model cannot be loaded or when
+    demonstrating the application without a trained model.
+    """
+
+    def __init__(self) -> None:
+        """Initialize the dummy pipeline with a name identifier."""
         self.name = "Dummy Colorizer"
 
-    def predict(self, input_tensor):
+    def predict(self, input_tensor: Union[torch.Tensor, np.ndarray]) -> torch.Tensor:
         """
-        Return random colorization (dummy output)
+        Generate random colorization as a dummy output.
 
         Args:
-            input_tensor: Input tensor (LLL)
+            input_tensor: Input tensor in format (3, H, W) representing grayscale image
+                          replicated across three channels (LLL)
 
         Returns:
-            torch-like tensor with random ab values
+            torch.Tensor: Random ab values in a tensor of shape (2, H, W)
+                         representing random colorization
         """
         # Get the shape of the input and create random ab channels
         # Input is (3, H, W), output should be (2, H, W)
@@ -38,12 +47,21 @@ class DummyPipeline:
         return torch.from_numpy(random_ab)
 
 
-def get_available_models():
+def get_available_models() -> List[Dict[str, Any]]:
     """
-    Get a list of available pre-trained models
+    Get a list of available pre-trained models in the system.
+
+    This function scans for available models, including the default untrained model
+    and a dummy model. It also checks if there's a trained model in the checkpoints
+    directory.
 
     Returns:
-        list: List of available model names and their paths
+        List[Dict[str, Any]]: List of dictionaries containing model information with keys:
+            - name: The model name
+            - path: Path to the model weights file (if any)
+            - description: Brief description of the model
+            - is_trained: Boolean indicating if the model has been trained
+            - is_dummy: Boolean indicating if it's a dummy model (for the dummy model only)
     """
     models = []
 
@@ -79,16 +97,30 @@ def get_available_models():
     return models
 
 
-def load_model(model_info, config):
+def load_model(
+    model_info: Dict[str, Any], config: Dict[str, Any]
+) -> Tuple[Union[ColorizationPipeline, DummyPipeline], bool]:
     """
-    Load a model based on model info and config
+    Load a model based on model info and config.
+
+    This function initializes either a real colorization model pipeline or a dummy pipeline
+    based on the provided model information. It handles loading model weights if available.
 
     Args:
-        model_info (dict): Model information dictionary
-        config (dict): Configuration for the pipeline
+        model_info: Dictionary containing model information:
+            - name: Model name
+            - path: Path to model weights
+            - is_trained: Whether the model has been trained
+            - is_dummy: Whether to use a dummy model
+        config: Configuration dictionary for the pipeline with settings for:
+            - data processing
+            - output paths
+            - training parameters
 
     Returns:
-        tuple: (model_pipeline, is_trained)
+        Tuple[Union[ColorizationPipeline, DummyPipeline], bool]:
+            - The initialized pipeline (either real or dummy)
+            - Boolean indicating if the model is trained
     """
     # Return dummy pipeline if model is dummy
     if model_info.get("is_dummy", False):

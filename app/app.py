@@ -2,6 +2,7 @@ import io
 import os
 import sys
 from pathlib import Path
+from typing import Any, Optional, Tuple, Union
 
 # Add the project root to the path before other imports
 sys.path.insert(0, str(Path(__file__).parent))
@@ -51,6 +52,76 @@ st.markdown(
     .stProgress > div > div > div > div {
         background-color: #1E88E5;
     }
+    .image-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+    .image-title {
+        font-weight: bold;
+        font-size: 1.1rem;
+        margin-bottom: 0.5rem;
+        text-align: center;
+    }
+    .stButton>button {
+        background-color: #1E88E5;
+        color: white;
+        border-radius: 8px;
+        padding: 0.5rem 1rem;
+        font-weight: bold;
+        border: none;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        transition: all 0.3s ease;
+    }
+    .stButton>button:hover {
+        background-color: #166ABF;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        transform: translateY(-2px);
+    }
+    .stDownloadButton>button {
+        background-color: #4CAF50;
+        color: white;
+        border-radius: 8px;
+        padding: 0.5rem 1rem;
+        font-weight: bold;
+        width: 100%;
+        border: none;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        transition: all 0.3s ease;
+        margin-top: 1rem;
+    }
+    .stDownloadButton>button:hover {
+        background-color: #3E8E41;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        transform: translateY(-2px);
+    }
+    .stFileUploader>div>div {
+        display: flex;
+        justify-content: center;
+    }
+    div[data-testid="stFileUploader"] div:first-child {
+        width: 100%;
+        justify-content: center;
+    }
+    div[data-testid="stFileUploader"] div button {
+        background-color: #1E88E5;
+        color: white;
+        border-radius: 8px;
+        font-weight: bold;
+    }
+    /* Hide the X button and file icon in the file uploader */
+    .st-emotion-cache-1pbsqtx {
+        display: none !important;
+    }
+    /* Hide any SVG with the file path in the uploader */
+    svg path[d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zM6 20V4h7v5h5v11H6z"] {
+        display: none !important;
+    }
+    /* Additional selector for the button that contains the X icon */
+    div[data-testid="stFileUploaderRemoveFile"] {
+        display: none !important;
+    }
 </style>
 """,
     unsafe_allow_html=True,
@@ -61,7 +132,21 @@ st.markdown(
     "<h1 class='main-header'>🎨 Image Colorization App</h1>", unsafe_allow_html=True
 )
 st.markdown(
-    "<p class='info-text'>Transform grayscale images into vibrant colored versions using deep learning.</p>",
+    "<p class='info-text' style='text-align: center;'>Transform grayscale images into vibrant colored versions using deep learning.</p>",
+    unsafe_allow_html=True,
+)
+
+st.markdown(
+    "<h2 class='sub-header' style='text-align: center;'>About This Project</h2>",
+    unsafe_allow_html=True,
+)
+st.markdown(
+    """
+<div style="max-width: 800px; margin: 0 auto; text-align: center;">
+    <p>This app demonstrates an image colorization model that can convert grayscale images to color.
+    The model uses deep learning to predict the color channels of an image based on its grayscale information.</p>
+</div>
+""",
     unsafe_allow_html=True,
 )
 
@@ -98,26 +183,36 @@ with st.sidebar:
             st.info(selected_model["description"])
 
     # Image Settings
-    st.markdown("<h2 class='sub-header'>Image Settings</h2>", unsafe_allow_html=True)
-    img_size = st.slider("Image Size", min_value=128, max_value=512, value=256, step=64)
-
-    # Example images
-    st.markdown("<h2 class='sub-header'>Example Images</h2>", unsafe_allow_html=True)
+    img_size = 256
 
     # Get example images
     test_img_dir = Path("data/test2017")
     example_images = get_example_images(test_img_dir, limit=5)
     if example_images:
         default_img_path = str(example_images[0])
-        st.info(f"Found {len(example_images)} example images")
     else:
         default_img_path = None
-        st.warning("No example images found.")
 
 
 # Helper function to preprocess image in fallback mode
-def preprocess_image_fallback(image, target_size):
-    """Simple preprocessing when ColorizeUtils is not available"""
+def preprocess_image_fallback(
+    image: Image.Image, target_size: Tuple[int, int]
+) -> Tuple[torch.Tensor, None]:
+    """
+    Simple image preprocessing when ColorizeUtils is not available.
+
+    This is a fallback function that converts an image to grayscale and normalizes it
+    for input to the colorization model.
+
+    Args:
+        image: Input PIL image
+        target_size: Target size (width, height) to resize the image to
+
+    Returns:
+        Tuple[torch.Tensor, None]:
+            - A tensor of shape (3, H, W) with the grayscale channel replicated
+            - None as a placeholder for the second return value expected by the main function
+    """
     # Resize the image
     img_resized = image.resize(target_size)
 
@@ -133,75 +228,24 @@ def preprocess_image_fallback(image, target_size):
     return input_tensor, None
 
 
-# Helper function to reconstruct image in fallback mode
-def reconstruct_image_fallback(input_tensor, ab_tensor):
-    """Simple image reconstruction when ColorizeUtils is not available"""
-    # Get dimensions
-    if hasattr(input_tensor, "shape"):
-        _, h, w = input_tensor.shape
-    else:
-        h, w = 256, 256
-
-    # If we have a proper tensor, convert to numpy
-    if hasattr(input_tensor, "cpu") and hasattr(input_tensor, "numpy"):
-        l_np = input_tensor[0].cpu().numpy()
-    elif hasattr(input_tensor, "numpy"):
-        l_np = input_tensor[0].numpy()
-    else:
-        l_np = input_tensor[0]
-
-    # Create a random colorized image
-    # This is a simple HSV colorization where we use the grayscale as V
-    # and generate random H and constant S
-    h_channel = np.random.random((h, w)) if ab_tensor is None else ab_tensor[0]
-    s_channel = np.ones((h, w)) * 0.6 if ab_tensor is None else (ab_tensor[1] + 1) / 2
-    v_channel = l_np
-
-    # Stack to create HSV
-    hsv = np.stack([h_channel, s_channel, v_channel], axis=2)
-
-    # Convert HSV to RGB (approximation)
-    # This is a simple conversion that doesn't require scikit-image
-    hi = np.floor(hsv[..., 0] * 6)
-    f = hsv[..., 0] * 6 - hi
-    p = hsv[..., 2] * (1 - hsv[..., 1])
-    q = hsv[..., 2] * (1 - f * hsv[..., 1])
-    t = hsv[..., 2] * (1 - (1 - f) * hsv[..., 1])
-
-    hi = hi.astype(np.int32) % 6
-    rgb = np.zeros_like(hsv)
-
-    rgb[hi == 0, 0] = hsv[hi == 0, 2]
-    rgb[hi == 0, 1] = t[hi == 0]
-    rgb[hi == 0, 2] = p[hi == 0]
-
-    rgb[hi == 1, 0] = q[hi == 1]
-    rgb[hi == 1, 1] = hsv[hi == 1, 2]
-    rgb[hi == 1, 2] = p[hi == 1]
-
-    rgb[hi == 2, 0] = p[hi == 2]
-    rgb[hi == 2, 1] = hsv[hi == 2, 2]
-    rgb[hi == 2, 2] = t[hi == 2]
-
-    rgb[hi == 3, 0] = p[hi == 3]
-    rgb[hi == 3, 1] = q[hi == 3]
-    rgb[hi == 3, 2] = hsv[hi == 3, 2]
-
-    rgb[hi == 4, 0] = t[hi == 4]
-    rgb[hi == 4, 1] = p[hi == 4]
-    rgb[hi == 4, 2] = hsv[hi == 4, 2]
-
-    rgb[hi == 5, 0] = hsv[hi == 5, 2]
-    rgb[hi == 5, 1] = p[hi == 5]
-    rgb[hi == 5, 2] = q[hi == 5]
-
-    return rgb
-
-
 # Function to load model
 @st.cache_resource
-def get_pipeline(model_name, img_size):
-    """Load the colorization model and create a pipeline."""
+def get_pipeline(model_name: str, img_size: int) -> Tuple[Union[Any, None], bool]:
+    """
+    Load the colorization model and create a pipeline.
+
+    This function loads the specified model and creates a pipeline for image colorization.
+    The result is cached by Streamlit to avoid reloading on each rerun.
+
+    Args:
+        model_name: Name of the model to load
+        img_size: Size of images to be processed (square images, width=height=img_size)
+
+    Returns:
+        Tuple[Union[Any, None], bool]:
+            - The colorization pipeline object (or None if loading failed)
+            - Boolean indicating whether the model is trained
+    """
     # Get the selected model info
     selected_model = next(
         (model for model in available_models if model["name"] == model_name), None
@@ -243,33 +287,29 @@ with st.spinner("Loading model..."):
             if is_trained
             else "(Untrained)"
         )
-        st.success(f"Model loaded successfully! {model_type}")
-    else:
-        st.error("Failed to load model. Using fallback mode.")
 
 
 # Main content
 st.markdown(
-    "<h2 class='sub-header'>Upload or Select an Image</h2>", unsafe_allow_html=True
+    "<h2 class='sub-header' style='text-align: center;'>Upload or Select an Image</h2>",
+    unsafe_allow_html=True,
 )
 
-# Image selection
-upload_col, sample_col = st.columns(2)
+# File uploader in a centered column
+col1, col2, col3 = st.columns([1, 2, 1])
+with col2:
+    uploaded_file = st.file_uploader(
+        "", type=["jpg", "jpeg", "png"], label_visibility="collapsed"
+    )
 
-with upload_col:
-    uploaded_file = st.file_uploader("Upload an image...", type=["jpg", "jpeg", "png"])
 
-with sample_col:
-    use_example = st.button("Use Example Image", type="primary")
+if "image" not in st.session_state:
+    st.session_state.image = None
 
 # Image processing
 if uploaded_file is not None:
     image_path = uploaded_file
     image = Image.open(uploaded_file).convert("RGB")
-    st.session_state.image = image
-elif use_example and default_img_path:
-    image_path = default_img_path
-    image = Image.open(default_img_path).convert("RGB")
     st.session_state.image = image
 else:
     image = st.session_state.get("image", None)
@@ -285,66 +325,46 @@ if image is not None:
     # Process the image
     with st.spinner("Colorizing image..."):
         # Prepare input for the model
-        try:
-            input_tensor, _ = ColorizationUtils.preprocess_image(
-                image, (img_size, img_size)
-            )
-        except Exception:
-            input_tensor, _ = preprocess_image_fallback(image, (img_size, img_size))
+        input_tensor, _ = ColorizationUtils.preprocess_image(
+            image, (img_size, img_size)
+        )
+        with torch.no_grad():
+            predicted_ab = pipeline.predict(input_tensor)
 
-        # Make prediction
-        try:
-            with torch.no_grad():
-                predicted_ab = pipeline.predict(input_tensor)
+        colorized_image_np = ColorizationUtils.reconstruct_image(
+            input_tensor, predicted_ab
+        )
 
-            # Reconstruct the image
-            try:
-                colorized_image_np = ColorizationUtils.reconstruct_image(
-                    input_tensor, predicted_ab
-                )
-            except Exception:
-                colorized_image_np = reconstruct_image_fallback(
-                    input_tensor, predicted_ab
-                )
+        colorized_image = Image.fromarray((colorized_image_np * 255).astype(np.uint8))
 
-            colorized_image = Image.fromarray(
-                (colorized_image_np * 255).astype(np.uint8)
-            )
-        except Exception as e:
-            st.error(f"Error during colorization: {str(e)}")
-            st.info("Using fallback random colorization")
-
-            # Fallback to random colorization
-            colorized_image_np = reconstruct_image_fallback(input_tensor, None)
-            colorized_image = Image.fromarray(
-                (colorized_image_np * 255).astype(np.uint8)
-            )
-
-    # Display images
+    # Display images in a row with titles
     col1, col2, col3 = st.columns(3)
 
     with col1:
-        st.markdown(
-            "<p style='text-align:center'>Original Image</p>", unsafe_allow_html=True
-        )
-        st.image(image, use_column_width=True)
+        st.markdown("<div class='image-container'>", unsafe_allow_html=True)
+        st.markdown("<p class='image-title'>Original Image</p>", unsafe_allow_html=True)
+        st.image(image, use_container_width=True)
+        st.markdown("</div>", unsafe_allow_html=True)
 
     with col2:
+        st.markdown("<div class='image-container'>", unsafe_allow_html=True)
         st.markdown(
-            "<p style='text-align:center'>Grayscale Input</p>", unsafe_allow_html=True
+            "<p class='image-title'>Grayscale Image</p>", unsafe_allow_html=True
         )
-        st.image(grayscale_image, use_column_width=True)
+        st.image(grayscale_image, use_container_width=True)
+        st.markdown("</div>", unsafe_allow_html=True)
 
     with col3:
+        st.markdown("<div class='image-container'>", unsafe_allow_html=True)
         st.markdown(
-            "<p style='text-align:center'>Colorized Result</p>", unsafe_allow_html=True
+            "<p class='image-title'>Colorized Result</p>", unsafe_allow_html=True
         )
-        st.image(colorized_image, use_column_width=True)
+        st.image(colorized_image, use_container_width=True)
+        st.markdown("</div>", unsafe_allow_html=True)
 
-    # Download buttons
-    col1, col2 = st.columns(2)
-
-    with col1:
+    # Download button - centered
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
         # Save image to bytes
         img_byte_arr = io.BytesIO()
         colorized_image.save(img_byte_arr, format="PNG")
@@ -357,33 +377,6 @@ if image is not None:
             mime="image/png",
         )
 
-    with col2:
-        # Show comparison slider
-        st.markdown(
-            "<p style='text-align:center'>Original vs. Colorized Comparison</p>",
-            unsafe_allow_html=True,
-        )
-        st.image([image, colorized_image], width=img_size)
-
-# Add information about the model and project
-st.markdown("---")
-st.markdown("<h2 class='sub-header'>About This Project</h2>", unsafe_allow_html=True)
-st.markdown("""
-This app demonstrates an image colorization model that can convert grayscale images to color.
-The model uses deep learning to predict the color channels of an image based on its grayscale information.
-
-**How it works:**
-1. The input image is converted to the LAB color space
-2. The L channel (lightness) is used as input to the model
-3. The model predicts the A and B channels (color information)
-4. The predicted A and B channels are combined with the original L channel
-5. The resulting LAB image is converted back to RGB
-
-**Technologies used:**
-- PyTorch for deep learning
-- ResNet architecture for image processing
-- Streamlit for the web interface
-""")
 
 # Footer
 st.markdown("---")
