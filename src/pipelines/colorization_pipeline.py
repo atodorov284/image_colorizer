@@ -5,6 +5,8 @@ import torch.optim as optim
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 from datetime import datetime
+import numpy as np 
+from torch.utils.data import Subset
 
 from dataloaders.colorization_dataset import ColorizationDataset
 from pipelines.base_pipeline import BasePipeline
@@ -40,9 +42,10 @@ class ColorizationPipeline(BasePipeline):
 
         self.early_stopping = EarlyStopping(patience=self.config["training"]["patience"], min_delta=self.config["training"]["min_delta"])
 
+        
     def setup_loaders(self) -> None:
         """
-        Sets up the data loaders.
+        Sets up the data loaders, optionally with a subset of the training data.
         """
         full_dataset = ColorizationDataset(
             root_dir=self.config["data"]["train_dir"],
@@ -54,6 +57,15 @@ class ColorizationPipeline(BasePipeline):
             captions_dir=self.config["data"]["val_captions_dir"],
             target_size=tuple(self.config["data"]["image_size"]),
         )
+
+        # Use a subset of the training dataset if subset_percent is provided
+        subset_percent = self.config["training"].get("subset_percent", 1.0)
+        if 0 < subset_percent < 1.0:
+            num_samples = int(len(full_dataset) * subset_percent)
+            indices = np.random.choice(len(full_dataset), num_samples, replace=False)
+            full_dataset = Subset(full_dataset, indices)
+            print(f"Using {num_samples} samples ({subset_percent*100:.1f}%) from the training dataset.")
+
         self.train_loader = DataLoader(
             full_dataset,
             batch_size=self.config["training"]["batch_size"],
@@ -62,10 +74,11 @@ class ColorizationPipeline(BasePipeline):
         self.val_loader = DataLoader(
             val_dataset,
             batch_size=self.config["training"]["batch_size"],
-            shuffle=True,
+            shuffle=False,
         )
 
         print(f"Train loader setup with {len(full_dataset)} images.")
+        print(f"Val loader setup with {len(val_dataset)} images.")
 
     def setup_optimizer_criterion(self) -> None:
         """

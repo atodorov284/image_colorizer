@@ -17,6 +17,7 @@ training:
   num_epochs: 1000
   patience: 10
   min_delta: 0.00001
+  subset_percent: 0.1 
 
 output:
   checkpoint_dir: ./resnet/checkpoints
