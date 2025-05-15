@@ -1,4 +1,4 @@
-import os
+import os, json, hashlib
 from typing import Tuple
 
 import torch
@@ -22,34 +22,56 @@ class ColorizationDataset(Dataset):
     """
 
     def __init__(
-        self, root_dir: str, captions_dir:str, target_size: Tuple[int, int] = (256, 256)
+        self, root_dir: str, captions_dir: str, target_size: Tuple[int, int] = (256, 256),
+        cache_path: str = ".filtered_images.json"
     ) -> None:
         """Constructor for ColorizationDataset."""
         self.root_dir: str = root_dir
         self.target_size: Tuple[int, int] = target_size
+        self.cache_path = cache_path
+
+        if os.path.exists(self.cache_path):
+            with open(self.cache_path) as f:
+                cache = json.load(f)
+            if cache.get("fingerprint") == self._fingerprint():
+                self.image_files = cache["image_files"]
+                print(f"Loaded {len(self.image_files)} image names from cache.")
+                return
+            else:
+                print("Dataset changed, since last run. Filtering again.")
+        else:
+            print(f"Cache not found at {self.cache_path}. Filtering images.")
+
+        self.image_files = self._build_filelist(captions_dir)
+
+        with open(self.cache_path, "w") as f:
+            json.dump({"fingerprint": self._fingerprint(),
+                       "image_files": self.image_files}, f)
+        print(f"Cache saved to {self.cache_path} for future runs.")
+
+    def _build_filelist(self, captions_dir):
         all_image_files: list[str] = [
-            f for f in os.listdir(root_dir) if os.path.isfile(os.path.join(root_dir, f))
+            f for f in os.listdir(self.root_dir) if os.path.isfile(os.path.join(self.root_dir, f))
         ]
-        self.image_files: list[str] = []
-        print(f"Found {len(all_image_files)} images before filtering.")
-
         coco = COCO(captions_dir)
+        kept = []
+        for name in tqdm(all_image_files, desc="Filtering images"):
+            path = os.path.join(self.root_dir, name)
+            if FiltersUtils.channel_difference_test(path):
+                continue
+            if FiltersUtils.caption_keywords_test(path, coco):
+                continue
+            kept.append(name)
+        print(f"Keeping {len(kept)} / {len(all_image_files)} images.")
+        print(f"Filtered {len(all_image_files) - len(kept)} images.")
+        return kept
 
-        for file_name in tqdm(all_image_files, desc="Filtering images"):
-            img_path = os.path.join(self.root_dir, file_name)
-
-            should_filter = False
-            if FiltersUtils.channel_difference_test(img_path):
-                should_filter = True
-
-            if FiltersUtils.caption_keywords_test(img_path, coco):
-                should_filter = True
-            
-            if not should_filter:
-                self.image_files.append(file_name)
-
-        print(f"Keeping {len(self.image_files)} images after filtering. {len(all_image_files) - len(self.image_files)} images filtered out.")
-
+    def _fingerprint(self):
+        md5 = hashlib.md5()
+        for name in sorted(f for f in os.listdir(self.root_dir) if os.path.isfile(os.path.join(self.root_dir, f))):
+            md5.update(name.encode())
+        return md5.hexdigest()
+    
     def __len__(self) -> int:
         """Returns the total number of images in the dataset."""
         return len(self.image_files)

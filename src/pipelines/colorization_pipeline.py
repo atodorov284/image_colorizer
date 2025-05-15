@@ -51,11 +51,13 @@ class ColorizationPipeline(BasePipeline):
             root_dir=self.config["data"]["train_dir"],
             captions_dir=self.config["data"]["train_captions_dir"],
             target_size=tuple(self.config["data"]["image_size"]),
+            cache_path=self.config["data"]["train_cache_path"]
         )
         val_dataset = ColorizationDataset(
             root_dir=self.config["data"]["val_dir"],
             captions_dir=self.config["data"]["val_captions_dir"],
             target_size=tuple(self.config["data"]["image_size"]),
+            cache_path=self.config["data"]["val_cache_path"]
         )
 
         # Use a subset of the training dataset if subset_percent is provided
