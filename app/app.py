@@ -16,6 +16,10 @@ import numpy as np
 import streamlit as st
 import torch
 from PIL import Image
+import io
+import base64
+import streamlit as st
+import streamlit.components.v1 as components
 
 # Import our app modules
 from app.model_loader import get_available_models, load_model
@@ -30,6 +34,118 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
+def create_comparison_slider(original_img, colorized_img, height=400):
+    """Create a slider for comparing before/after images using streamlit components.
+    
+    Args:
+        original_img: Original PIL image (grayscale)
+        colorized_img: Colorized PIL image
+        height: Height of the comparison widget in pixels
+        
+    Returns:
+        None - directly renders the component
+    """
+    import base64
+    import io
+    
+    # Ensure images are the same size, original_img is used as reference
+    width, _ = original_img.size 
+    # If colorized_img has a different size, resize it to match original_img.
+    # This assumes original_img and colorized_img should be aligned.
+    if colorized_img.size != original_img.size:
+        colorized_img = colorized_img.resize(original_img.size)
+
+    orig_bytes = io.BytesIO()
+    colorized_bytes = io.BytesIO()
+    original_img.save(orig_bytes, format="PNG")
+    colorized_img.save(colorized_bytes, format="PNG")
+    
+    orig_base64 = base64.b64encode(orig_bytes.getvalue()).decode()
+    colorized_base64 = base64.b64encode(colorized_bytes.getvalue()).decode()
+    
+    # Unique ID for elements to avoid conflicts if multiple sliders are on a page
+    component_id = f"comparison-slider-{int(np.random.rand() * 1000000)}"
+
+    html_code = f"""
+    <div id="{component_id}" style="position: relative; width: 100%; height: {height}px; overflow: hidden;">
+        <img src="data:image/png;base64,{orig_base64}" 
+             style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain;" 
+             alt="Original Image" />
+        <div class="colorized-overlay" 
+             style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden;">
+            <img src="data:image/png;base64,{colorized_base64}" 
+                 style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; clip-path: inset(0 100% 0 0);" 
+                 alt="Colorized Image" />
+        </div>
+        <input type="range" class="slider" min="0" max="100" value="0" 
+               style="position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); width: 90%; z-index: 10;" 
+               aria-label="Comparison Slider"/>
+        <div class="divider" 
+             style="position: absolute; top: 0; bottom: 0; left: 0%; width: 3px; background: rgba(255, 255, 255, 0.7); box-shadow: 0 0 3px rgba(0,0,0,0.5); z-index: 5; cursor: ew-resize;">
+        </div>
+    </div>
+
+    <script>
+    (function() {{
+        // Ensure this script runs for the correct component instance
+        const currentDoc = document.currentScript.ownerDocument;
+        const container = currentDoc.getElementById("{component_id}");
+        if (!container) {{
+            console.error("Slider container not found: {component_id}");
+            return;
+        }}
+        
+        const slider = container.querySelector('.slider');
+        const colorizedOverlay = container.querySelector('.colorized-overlay img'); // Target the img inside the overlay
+        const divider = container.querySelector('.divider');
+        
+        function updateVisuals(percent) {{
+            // The clip-path reveals 'percent' of the image from the left.
+            // inset(top right bottom left)
+            // To show 'percent' from left, we clip (100-percent) from the right.
+            const clipValue = 100 - parseFloat(percent);
+            colorizedOverlay.style.clipPath = `inset(0 ${{clipValue}}% 0 0)`;
+            divider.style.left = percent + '%';
+        }}
+        
+        // Initial setup based on slider's current value (which is 0)
+        updateVisuals(slider.value); 
+        
+        slider.addEventListener('input', function(e) {{
+            updateVisuals(e.target.value);
+        }});
+
+        // Optional: Make the divider draggable (basic implementation)
+        let isDragging = false;
+        divider.addEventListener('mousedown', function(e) {{
+            isDragging = true;
+            container.style.cursor = 'ew-resize';
+        }});
+        container.addEventListener('mouseup', function(e) {{
+            if (isDragging) {{
+                isDragging = false;
+                container.style.cursor = 'default';
+            }}
+        }});
+        container.addEventListener('mouseleave', function(e) {{ // Stop dragging if mouse leaves container
+             if (isDragging) {{
+                isDragging = false;
+                container.style.cursor = 'default';
+            }}
+        }});
+        container.addEventListener('mousemove', function(e) {{
+            if (isDragging) {{
+                const rect = container.getBoundingClientRect();
+                let percent = ((e.clientX - rect.left) / rect.width) * 100;
+                percent = Math.max(0, Math.min(100, percent)); // Clamp between 0 and 100
+                slider.value = percent;
+                updateVisuals(percent);
+            }}
+        }});
+    }})();
+    </script>
+    """
+    components.html(html_code, height=height + 70)
 # Custom CSS for styling
 st.markdown(
     """
@@ -336,6 +452,10 @@ if image is not None:
         )
 
         colorized_image = Image.fromarray((colorized_image_np * 255).astype(np.uint8))
+    
+    # Directly call the function to render the slider
+    st.markdown("<h3>Drag to Compare Before/After</h3>", unsafe_allow_html=True)
+    create_comparison_slider(grayscale_image, colorized_image) # This will now render the slider
 
     # Display images in a row with titles
     col1, col2, col3 = st.columns(3)
