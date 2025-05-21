@@ -19,7 +19,12 @@ training:
   num_epochs: 1000
   patience: 3
   min_delta: 0.00001
-  subset_percent: 0.1 
+  subset_percent: 0.1
+
+testing:
+  test_dir: ./data/test2017
+  subset_percent: 0.05
+  predicted_image_dir: ./test/colorised_images
 
 output:
   checkpoint_dir: ./resnet/checkpoints
