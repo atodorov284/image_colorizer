@@ -47,10 +47,7 @@ if __name__ == "__main__":
         lll, _ = ColorizationUtils.preprocess_image(pil_in, target_size)
         predicted_ab = PredictingUtils.predict(model, device, lll)
 
-        lll_norm = lll.cpu() * 100.0
-        ab_denorm = predicted_ab.cpu() * 128.0
-
-        rgb_np_float = ColorizationUtils.reconstruct_image(lll_norm, ab_denorm)
+        rgb_np_float = ColorizationUtils.reconstruct_image(lll, predicted_ab)
 
         coloured_image = Image.fromarray((rgb_np_float * 255.0).clip(0, 255).astype("uint8"))
 

@@ -58,7 +58,6 @@ class PredictingUtils:
             return [test_dir]
         else:
             raise FileNotFoundError(f"Invalid test_dir: {test_dir}. It should be a file or a directory.")
-        print(img_paths)
         if subset_percent < 1.0:
             img_paths = img_paths[:int(len(img_paths) * subset_percent)]
         return img_paths
