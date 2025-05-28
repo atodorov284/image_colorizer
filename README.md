@@ -40,35 +40,60 @@ uv sync
 ## 📁 Project Structure
 ```
 image_colorizer/
-│
-├── app/                    # Streamlit web application
-│   ├── __init__.py         # App initialization
-│   ├── app.py              # Main Streamlit UI
-│   ├── model_loader.py     # Model loading logic
-│   └── utils.py            # UI utility functions
-│
-├── data/                   # Image datasets
-│   ├── train2017/          # Training images
-│   ├── val2017/            # Validation images
-│   └── test2017/           # Test/demo images
-│
-├── src/                    # Core source code
-│   ├── configs/            # YAML configuration files
-│   ├── dataloaders/        # Dataset preparation code
-│   ├── models/             # Model architecture
-│   │   ├── base_model.py   # Abstract model class
-│   │   └── resnet.py       # ResNet colorization model
-│   ├── pipelines/          # Training and evaluation pipelines
-│   └── utils/              # Generic utilities
-│
-├── .python-version         # Python version file
-├── pyproject.toml          # Project and dependency manager config
-└── README.md               # 📄 You're here!
+├── README.md                           # Project documentation
+├── app/                               # Streamlit web application
+│   ├── __init__.py
+│   ├── app.py                         # Main Streamlit UI interface
+│   ├── model_loader.py                # Handles loading trained models
+│   └── utils.py                       # UI utility functions and helpers
+├── notebooks/                         # Jupyter notebooks for analysis
+│   ├── data_analysis.ipynb            # Dataset exploration and statistics
+│   └── filtering.ipynb                # Data preprocessing experiments
+├── pyproject.toml                     # Project dependencies and metadata
+├── src/                              # Core source code
+│   ├── __init__.py
+│   ├── api/                          # API-related modules
+│   │   ├── __init__.py
+│   │   ├── front_end.py              
+│   │   ├── main.py                   # Main API application
+│   │   └── model_hub.py              # Model management and registry
+│   ├── configs/
+│   │   └── resnet_config.yaml        # ResNet model configuration parameters
+│   ├── dataloaders/
+│   │   ├── __init__.py
+│   │   └── colorization_dataset.py   # Dataset loading and preprocessing
+│   ├── models/                       # Neural network architectures
+│   │   ├── __init__.py
+│   │   ├── base_model.py             # Abstract base class for all models
+│   │   ├── resnet.py                 # ResNet-based colorization model
+│   │   └── vit.py              
+│   ├── pipelines/                    # Training and inference workflows
+│   │   ├── __init__.py
+│   │   ├── base_pipeline.py          # Abstract pipeline base class
+│   │   └── colorization_pipeline.py  # Complete colorization workflow
+│   ├── predict.py                    # Standalone prediction script
+│   ├── train.py                      # Model training script
+│   └── utils/                        # Utility functions
+│       ├── __init__.py
+│       ├── colorization_utils.py     # Color space conversion utilities
+│       ├── early_stopping.py        # Training early stopping logic
+│       ├── filtering_utils.py        # Image filtering and preprocessing
+│       └── predicting_utils.py       # Prediction helper functions
+└── uv.lock                           # Locked dependency versions
 ```
 
 
 ## 🚀 Usage
 ### 🖼️ Running the Web Application
+
+To run the API:
+```bash
+cd src
+uvicorn api.main:app --reload
+```
+- Upload an image to predict/resnet
+- Or upload an image to predict/vit (development still in progress)
+
 To start the Streamlit web interface:
 ```bash
 cd app
