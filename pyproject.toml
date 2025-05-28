@@ -6,6 +6,7 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "datasets>=3.5.0",
+    "fastapi[standard]>=0.115.12",
     "huggingface>=0.0.1",
     "iprogress>=0.4",
     "ipykernel>=6.29.5",
