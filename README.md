@@ -85,6 +85,15 @@ image_colorizer/
 
 ## 🚀 Usage
 ### 🖼️ Running the Web Application
+
+To run the API:
+```bash
+cd src
+uvicorn api.main:app --reload
+```
+- Upload an image to predict/resnet
+- Or upload an image to predict/vit (development still in progress)
+
 To start the Streamlit web interface:
 ```bash
 cd app
