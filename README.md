@@ -69,12 +69,45 @@
 
 ## Description
 
-
+Add your project description here...
 
 ## Installation
 
-Add installation instructions here...
+### Prerequisites
+- Python 3.9 or higher
+- uv package manager (recommended) or pip
+
+### Install Dependencies
+
+**Using uv (recommended):**
+```bash
+uv sync
+```
+
+**Using pip:**
+```bash
+pip install -r requirements.txt
+```
 
 ## Usage
 
-Add usage instructions here...
+### Launch the API
+To start the Streamlit application:
+
+```bash
+streamlit run app/app.py
+```
+
+The application will be available at `http://localhost:8501`
+
+### Training
+To train a model:
+```bash
+python src/train.py
+```
+
+### Prediction
+To run predictions:
+```bash
+python src/predict.py
+```
