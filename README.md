@@ -96,8 +96,7 @@ uvicorn api.main:app --reload
 
 To start the Streamlit web interface:
 ```bash
-cd app
-streamlit run app.py
+streamlit run app/app.py
 ```
 This will launch the application in your default browser. You can:
 
