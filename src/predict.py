@@ -11,7 +11,7 @@ from utils.colorization_utils import ColorizationUtils
 from utils.predicting_utils import PredictingUtils
 
 if __name__ == "__main__":
-    with open("src/configs/resnet_config.yaml", "r") as file:
+    with open("src/configs/vit_config.yaml", "r") as file:
         config = yaml.safe_load(file)
 
     device = (
@@ -35,8 +35,9 @@ if __name__ == "__main__":
             print("Model loaded successfully.")
     elif config["model"]["name"] == "vit":
         if os.path.exists(model_ckpt_path):
-            model = ViTColorizationModel()
+            model = ViTColorizationModel(pretrained=False)
             state = torch.load(model_ckpt_path, map_location=device)
+            state = state["model_state_dict"]
             model.load_state_dict(state)
             model.to(device)
             model.eval()

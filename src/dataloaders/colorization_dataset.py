@@ -63,7 +63,7 @@ class ColorizationDataset(Dataset):
         ]
         coco = COCO(captions_dir)
         kept = []
-        for name in tqdm(all_image_files[:200], desc="Filtering images"):
+        for name in tqdm(all_image_files, desc="Filtering images"):
             path = os.path.join(self.root_dir, name)
             if FiltersUtils.channel_difference_test(path):
                 continue
