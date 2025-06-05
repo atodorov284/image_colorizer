@@ -112,7 +112,7 @@ const ChromaFlow: React.FC = () => {
       setError(null); // Clear previous errors
       setProcessingState({ isProcessing: false, showResults: false }); // Reset results view
       if (colorizedImageRef.current) {
-        colorizedImageRef.current.src = ""; // Clear previous colorized image
+        colorizedImageRef.current.src = ""; // Clear previous colorized image, TS expects string here
       }
     }
   };
@@ -148,10 +148,10 @@ const ChromaFlow: React.FC = () => {
 
     const formData = new FormData();
     formData.append('image', uploadedFile);
-    formData.append('model_type', getApiModelType(selectedModel));
 
     try {
-      const response = await fetch('http://localhost:8000/colorize_image/', {
+      const apiModelType = getApiModelType(selectedModel);
+      const response = await fetch(`http://localhost:8000/predict?model=${apiModelType}`, {
         method: 'POST',
         body: formData,
       });
@@ -365,7 +365,7 @@ const ChromaFlow: React.FC = () => {
                       />
                       <img
                         ref={colorizedImageRef}
-                        src={processingState.showResults && colorizedImageRef.current?.src ? colorizedImageRef.current.src : ""} // Keep existing src if available and results are shown
+                        src={processingState.showResults && colorizedImageRef.current?.src ? colorizedImageRef.current.src : undefined}
                         alt="Colorized"
                         className="absolute top-0 left-0 w-full h-auto block rounded-xl"
                         style={{ clipPath: `polygon(0 0, ${sliderValue}% 0, ${sliderValue}% 100%, 0% 100%)` }}
