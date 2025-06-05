@@ -1,57 +1,35 @@
 "use client"
-import React, { useState } from 'react';
+import React from 'react';
 import Head from 'next/head';
 import Image from 'next/image';
 import Link from 'next/link';
 
 const AboutPage: React.FC = () => {
-  const [activeTab, setActiveTab] = useState('team');
-
   const teamMembers = [
     {
-      name: 'Dr. Sarah Chen',
-      role: 'Founder & CEO',
-      image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=300&q=80',
-      bio: 'AI researcher with 15+ years in computer vision and deep learning. PhD from MIT.',
-      socials: { twitter: '#', linkedin: '#', github: '#' }
+      name: 'Sven van Loon',
+      image: '/Sven.jpg',
+      bio: 'Future Google ML engineer, Specializing in API development and machine learning, with a focus on image processing.',
+      socials: { linkedin: 'https://www.linkedin.com/in/sven-van-loon-750373338/', github: 'https://github.com/svens0n58' }
     },
     {
-      name: 'Marcus Williams',
-      role: 'CTO',
-      image: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=300&q=80',
-      bio: 'Former Google ML engineer, expert in scalable AI infrastructure.',
-      socials: { twitter: '#', linkedin: '#', github: '#' }
+      name: 'Mika Umaña',
+      image: '/Mika.jpeg',
+      bio: 'AI Beachelor student at the University of Groningen and co-founder of ChromaFlow.',
+      socials: { linkedin: 'https://www.linkedin.com/in/mika-umaña-lemus-76a485260', github: 'https://github.com/MikaMann' }
     },
     {
-      name: 'Dr. Yuki Tanaka',
-      role: 'Head of Research',
-      image: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=300&q=80',
-      bio: 'PhD in Neural Networks from Stanford, published 50+ papers on image colorization.',
-      socials: { twitter: '#', linkedin: '#' }
+      name: 'Alexander Todorov',
+      image: '/Alex.jpg',
+      bio: 'Teaching Assistant & Student at the University of Groningen and co-founder of ChromaFlow.',
+      socials: { linkedin: 'https://www.linkedin.com/in/aleksandar-todorov-26b756213/', github: 'https://github.com/atodorov284'}
     },
     {
-      name: 'Emma Rodriguez',
-      role: 'Lead Designer',
-      image: 'https://images.unsplash.com/photo-1598550874175-4d0ef436c909?auto=format&fit=crop&w=300&q=80',
+      name: 'Christian Kobriger',
+      image: '/Chirs.jpeg',
       bio: 'Award-winning UX designer specializing in AI-powered creative tools.',
-      socials: { twitter: '#', behance: '#' }
+      socials: { linkedin: 'www.linkedin.com/in/christian-kobriger-171621192', github: 'https://github.com/03chrisk'}
     }
-  ];
-
-  const stats = [
-    { value: '10M+', label: 'Images Colorized', icon: 'fas fa-images', color: 'from-purple-500 to-pink-500' },
-    { value: '2M+', label: 'Happy Users', icon: 'fas fa-users', color: 'from-blue-500 to-cyan-500' },
-    { value: '99.9%', label: 'Uptime', icon: 'fas fa-server', color: 'from-green-500 to-teal-500' },
-    { value: '150+', label: 'Countries Served', icon: 'fas fa-globe', color: 'from-orange-500 to-red-500' }
-  ];
-
-  const partners = [
-    { name: 'Google Cloud', category: 'Infrastructure', logo: 'fab fa-google' },
-    { name: 'NVIDIA', category: 'GPU Computing', logo: 'fas fa-microchip' },
-    { name: 'National Archives', category: 'Historical Preservation', logo: 'fas fa-archive' },
-    { name: 'Getty Images', category: 'Media Partner', logo: 'fas fa-camera' },
-    { name: 'Adobe', category: 'Creative Tools', logo: 'fab fa-adobe' },
-    { name: 'MIT Media Lab', category: 'Research', logo: 'fas fa-university' }
   ];
 
   const values = [
@@ -90,13 +68,6 @@ const AboutPage: React.FC = () => {
     { name: 'Redis', category: 'Caching', icon: '💾', color: 'bg-gradient-to-br from-red-600 to-red-800' }
   ];
 
-  const awards = [
-    { year: '2023', title: 'Best AI Startup', org: 'TechCrunch Disrupt' },
-    { year: '2023', title: 'Innovation Award', org: 'Computer Vision Society' },
-    { year: '2022', title: "Editor's Choice", org: 'Photography Weekly' },
-    { year: '2022', title: 'Top 100 AI Companies', org: 'AI Magazine' }
-  ];
-
   const faqs = [
     {
       question: 'How does ChromaFlow work?',
@@ -115,21 +86,6 @@ const AboutPage: React.FC = () => {
       answer: 'Yes! We offer commercial licenses and API access for businesses. Contact our sales team for custom pricing and enterprise features.'
     }
   ];
-
-  const TabButton: React.FC<{tabName: string, displayName: string}> = ({ tabName, displayName }) => (
-    <button
-      onClick={() => setActiveTab(tabName)}
-      className={`px-4 py-3 md:px-8 md:py-4 font-semibold transition-all duration-300 rounded-lg relative overflow-hidden group
-        ${activeTab === tabName 
-          ? 'text-white bg-gradient-to-r from-violet-500 to-purple-600 shadow-lg shadow-purple-500/25' 
-          : 'text-gray-300 hover:text-white hover:bg-white/10 backdrop-blur-sm border border-white/20'}`}
-    >
-      <span className="relative z-10">{displayName}</span>
-      {activeTab === tabName && (
-        <div className="absolute inset-0 bg-gradient-to-r from-violet-500 to-purple-600 opacity-90"></div>
-      )}
-    </button>
-  );
 
   return (
     <>
@@ -217,115 +173,59 @@ const AboutPage: React.FC = () => {
             </div>
           </div>
         </section>
-
-        {/* Tab Navigation */}
-        <div className="sticky top-[88px] z-40 py-8">
-            <div className="container mx-auto px-4 flex justify-center items-center space-x-4 md:space-x-6">
-                <TabButton tabName="team" displayName="Our Team" />
-                <TabButton tabName="values" displayName="Our Values" />
-                <TabButton tabName="faq" displayName="FAQs" />
-            </div>
-        </div>
         
-        {/* Tab Content */}
-        <main className="tab-content">
-          {activeTab === 'team' && (
-            <section id="team" className="py-16 md:py-24">
-              <div className="container mx-auto px-4">
-                <h2 className="text-5xl font-bold mb-20 text-center">
-                  Meet Our <span className="gradient-text">Experts</span>
-                </h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 max-w-7xl mx-auto">
-                  {teamMembers.map((member, index) => (
-                    <div key={member.name} className="glass-card p-8 rounded-3xl hover-glow transition-all duration-500 transform hover:-translate-y-2 group">
-                      <div className="relative w-24 h-24 mx-auto mb-6">
-                        <div className="absolute inset-0 bg-gradient-to-r from-violet-500 to-purple-600 rounded-2xl blur opacity-75 group-hover:opacity-100 transition-opacity duration-300"></div>
-                        <div className="relative w-full h-full rounded-2xl overflow-hidden border-2 border-white/20">
-                          <Image 
-                            src={member.image} 
-                            alt={member.name} 
-                            fill 
-                            className="object-cover"
-                            sizes="96px"
-                          />
-                        </div>
-                      </div>
-                      <h3 className="text-xl font-bold mb-2 text-center">{member.name}</h3>
-                      <p className="text-violet-400 font-semibold mb-4 text-center">{member.role}</p>
-                      <p className="text-gray-300 text-sm mb-6 text-center leading-relaxed">{member.bio}</p>
-                      <div className="flex justify-center space-x-4">
-                        {member.socials.twitter && <a href={member.socials.twitter} className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-blue-500 transition-colors duration-300"><i className="fab fa-twitter"></i></a>}
-                        {member.socials.linkedin && <a href={member.socials.linkedin} className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-blue-600 transition-colors duration-300"><i className="fab fa-linkedin"></i></a>}
-                        {member.socials.github && <a href={member.socials.github} className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-gray-700 transition-colors duration-300"><i className="fab fa-github"></i></a>}
-                        {member.socials.behance && <a href={member.socials.behance} className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-blue-500 transition-colors duration-300"><i className="fab fa-behance"></i></a>}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </section>
-          )}
-
-          {activeTab === 'values' && (
-             <section id="values" className="py-16 md:py-24">
-              <div className="container mx-auto px-4">
-                <h2 className="text-5xl font-bold mb-20 text-center">
-                  Our Core <span className="gradient-text">Values</span>
-                </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-7xl mx-auto">
-                  {values.map((value, index) => (
-                    <div key={value.title} className="glass-card p-8 rounded-3xl hover-glow transition-all duration-500 transform hover:-translate-y-2 text-center group">
-                      <div className={`bg-gradient-to-r ${value.color} w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg group-hover:scale-110 transition-transform duration-300`}>
-                        <i className={`${value.icon} text-white text-3xl`}></i>
-                      </div>
-                      <h3 className="text-2xl font-bold mb-4">{value.title}</h3>
-                      <p className="text-gray-300 leading-relaxed">{value.description}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </section>
-          )}
-          
-          {activeTab === 'faq' && (
-            <section id="faq" className="py-16 md:py-24">
-              <div className="container mx-auto px-4">
-                <h2 className="text-5xl font-bold mb-20 text-center">
-                  Frequently Asked <span className="gradient-text">Questions</span>
-                </h2>
-                <div className="max-w-4xl mx-auto space-y-6">
-                  {faqs.map((faq, index) => (
-                    <div key={index} className="glass-card p-8 rounded-3xl hover-glow transition-all duration-300 transform hover:-translate-y-1">
-                      <h3 className="text-xl font-bold text-violet-400 mb-4">{faq.question}</h3>
-                      <p className="text-gray-300 leading-relaxed text-lg">{faq.answer}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </section>
-          )}
-        </main>
-
-        {/* Stats Section */}
-        <section className="py-20 md:py-32 relative">
-          <div className="absolute inset-0 bg-gradient-to-r from-slate-800/50 to-purple-800/50"></div>
-          <div className="container mx-auto px-4 relative z-10">
+        {/* Team Section */}
+        <section id="team" className="py-16 md:py-24">
+          <div className="container mx-auto px-4">
             <h2 className="text-5xl font-bold mb-20 text-center">
-              ChromaFlow by the <span className="gradient-text">Numbers</span>
+              Meet Our <span className="gradient-text">Experts</span>
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 text-center max-w-6xl mx-auto">
-              {stats.map((stat, index) => (
-                <div key={stat.label} className="glass-card p-8 rounded-3xl hover-glow transition-all duration-500 transform hover:-translate-y-2 group">
-                  <div className={`bg-gradient-to-r ${stat.color} w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg group-hover:scale-110 transition-transform duration-300`}>
-                    <i className={`${stat.icon} text-white text-3xl`}></i>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 max-w-7xl mx-auto">
+              {teamMembers.map((member, index) => (
+                <div key={member.name} className="glass-card p-8 rounded-3xl hover-glow transition-all duration-500 transform hover:-translate-y-2 group">
+                  <div className="relative w-24 h-24 mx-auto mb-6">
+                    <div className="absolute inset-0 bg-gradient-to-r from-violet-500 to-purple-600 rounded-2xl blur opacity-75 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    <div className="relative w-full h-full rounded-2xl overflow-hidden border-2 border-white/20">
+                      <Image 
+                        src={member.image} 
+                        alt={member.name} 
+                        fill 
+                        className="object-cover"
+                        sizes="96px"
+                      />
+                    </div>
                   </div>
-                  <div className="text-4xl font-bold mb-2">{stat.value}</div>
-                  <p className="text-gray-300 text-lg">{stat.label}</p>
+                  <h3 className="text-xl font-bold mb-2 text-center">{member.name}</h3>
+                  <p className="text-gray-300 text-sm mb-6 text-center leading-relaxed">{member.bio}</p>
+                  <div className="flex justify-center space-x-4">
+                    {member.socials.linkedin && <a href={member.socials.linkedin} className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-blue-600 transition-colors duration-300"><i className="fab fa-linkedin"></i></a>}
+                    {member.socials.github && <a href={member.socials.github} className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-gray-700 transition-colors duration-300"><i className="fab fa-github"></i></a>}
+                  </div>
                 </div>
               ))}
             </div>
           </div>
         </section>
+
+        {/* Our Values Section */}
+        <section id="values" className="py-16 md:py-24">
+            <div className="container mx-auto px-4">
+              <h2 className="text-5xl font-bold mb-20 text-center">
+                Our Core <span className="gradient-text">Values</span>
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-7xl mx-auto">
+                {values.map((value, index) => (
+                  <div key={value.title} className="glass-card p-8 rounded-3xl hover-glow transition-all duration-500 transform hover:-translate-y-2 text-center group">
+                    <div className={`bg-gradient-to-r ${value.color} w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg group-hover:scale-110 transition-transform duration-300`}>
+                      <i className={`${value.icon} text-white text-3xl`}></i>
+                    </div>
+                    <h3 className="text-2xl font-bold mb-4">{value.title}</h3>
+                    <p className="text-gray-300 leading-relaxed">{value.description}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
 
         {/* Tech Stack Section */}
         <section className="py-20 md:py-32">
@@ -347,61 +247,22 @@ const AboutPage: React.FC = () => {
             </div>
         </section>
 
-        {/* Partners Section */}
-        <section className="py-20 md:py-32 relative">
-          <div className="absolute inset-0 bg-gradient-to-r from-purple-800/30 to-slate-800/30"></div>
-          <div className="container mx-auto px-4 relative z-10">
-            <h2 className="text-5xl font-bold mb-20 text-center">
-              Our Valued <span className="gradient-text">Partners</span>
-            </h2>
-            <div className="flex flex-wrap justify-center items-center gap-12 md:gap-16 max-w-5xl mx-auto">
-              {partners.map((partner, index) => (
-                <div key={partner.name} className="text-center glass-card p-6 rounded-2xl hover-glow transition-all duration-300 transform hover:-translate-y-2 group">
-                  <i className={`${partner.logo} text-5xl md:text-6xl text-gray-300 group-hover:text-white transition-colors duration-300 mb-3`}></i>
-                  <p className="text-sm font-semibold">{partner.name}</p>
-                  <p className="text-xs text-gray-400">{partner.category}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-        
-        {/* Awards Section */}
-        <section className="py-20 md:py-32">
+        {/* FAQ Section */}
+        <section id="faq" className="py-16 md:py-24">
             <div className="container mx-auto px-4">
-                <h2 className="text-5xl font-bold mb-20 text-center">
-                  Recognitions & <span className="gradient-text">Awards</span>
-                </h2>
-                <div className="max-w-4xl mx-auto space-y-8">
-                    {awards.reduce((acc, award) => {
-                        const yearGroup = acc.find(g => g.year === award.year);
-                        if (yearGroup) {
-                            yearGroup.items.push(award);
-                        } else {
-                            acc.push({ year: award.year, items: [award] });
-                        }
-                        return acc;
-                    }, [] as { year: string; items: typeof awards }[]).sort((a,b) => parseInt(b.year) - parseInt(a.year)).map(group => (
-                        <div key={group.year} className="glass-card p-8 rounded-3xl hover-glow transition-all duration-300 transform hover:-translate-y-1">
-                            <h3 className="text-3xl font-bold text-violet-400 mb-6 border-b border-white/20 pb-4">{group.year}</h3>
-                            <ul className="space-y-4">
-                                {group.items.map((award, index) => (
-                                    <li key={award.title} className="flex items-start">
-                                        <div className="bg-gradient-to-r from-yellow-400 to-orange-500 w-12 h-12 rounded-xl flex items-center justify-center mr-4 flex-shrink-0">
-                                          <i className="fas fa-award text-white text-xl"></i>
-                                        </div>
-                                        <div>
-                                            <span className="font-semibold text-lg text-gray-200">{award.title}</span>
-                                            <p className="text-gray-400">{award.org}</p>
-                                        </div>
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
-                    ))}
-                </div>
+              <h2 className="text-5xl font-bold mb-20 text-center">
+                Frequently Asked <span className="gradient-text">Questions</span>
+              </h2>
+              <div className="max-w-4xl mx-auto space-y-6">
+                {faqs.map((faq, index) => (
+                  <div key={index} className="glass-card p-8 rounded-3xl hover-glow transition-all duration-300 transform hover:-translate-y-1">
+                    <h3 className="text-xl font-bold text-violet-400 mb-4">{faq.question}</h3>
+                    <p className="text-gray-300 leading-relaxed text-lg">{faq.answer}</p>
+                  </div>
+                ))}
+              </div>
             </div>
-        </section>
+          </section>
 
         {/* Footer */}
         <footer className="py-16 bg-slate-900/80 backdrop-blur-lg border-t border-white/10">
@@ -460,7 +321,7 @@ const AboutPage: React.FC = () => {
                     </div>
                 </div>
                 <div className="border-t border-white/10 mt-12 pt-8 text-center text-gray-500">
-                    <p>&copy; {new Date().getFullYear()} ChromaFlow. All rights reserved. Made with <i className="fas fa-heart text-violet-400"></i> in Silicon Valley.</p>
+                    <p>&copy; {new Date().getFullYear()} ChromaFlow. All rights reserved. Made with <i className="fas fa-heart text-violet-400"></i> in Groningen.</p>
                 </div>
             </div>
         </footer>
