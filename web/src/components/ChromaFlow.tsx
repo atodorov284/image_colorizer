@@ -93,29 +93,51 @@ const ChromaFlow: React.FC = () => {
     setIsDragActive(false);
   };
 
-  const handleFileSelected = (file: File | undefined) => {
-    if (file) {
-      if (file.size > 10 * 1024 * 1024) { // 10MB limit
-        setError("File size exceeds 10MB. Please upload a smaller image.");
-        setUploadedFile(null);
-        setOriginalImageSrc(null);
-        return;
-      }
-      if (!['image/jpeg', 'image/png', 'image/bmp'].includes(file.type)) {
-        setError("Invalid file type. Please upload JPG, PNG, or BMP.");
-        setUploadedFile(null);
-        setOriginalImageSrc(null);
-        return;
-      }
-      setUploadedFile(file);
-      setOriginalImageSrc(URL.createObjectURL(file));
-      setError(null); // Clear previous errors
-      setProcessingState({ isProcessing: false, showResults: false }); // Reset results view
-      if (colorizedImageRef.current) {
-        colorizedImageRef.current.src = ""; // Clear previous colorized image, TS expects string here
-      }
+  const handleFileSelected = async (file: File | undefined) => {
+  if (file) {
+    if (file.size > 10 * 1024 * 1024) {
+      setError("File size exceeds 10MB. Please upload a smaller image.");
+      setUploadedFile(null);
+      setOriginalImageSrc(null);
+      return;
     }
-  };
+    if (!['image/jpeg', 'image/png', 'image/bmp'].includes(file.type)) {
+      setError("Invalid file type. Please upload JPG, PNG, or BMP.");
+      setUploadedFile(null);
+      setOriginalImageSrc(null);
+      return;
+    }
+
+    try {
+      // Get the grayscale preview from the API
+      const formData = new FormData();
+      formData.append('image', file);
+      
+      const response = await fetch('http://localhost:8000/preview', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to get image preview');
+      }
+
+      const previewBlob = await response.blob();
+      const previewUrl = URL.createObjectURL(previewBlob);
+      
+      setUploadedFile(file);
+      setOriginalImageSrc(previewUrl);
+      setError(null);
+      setProcessingState({ isProcessing: false, showResults: false });
+      if (colorizedImageRef.current) {
+        colorizedImageRef.current.src = "";
+      }
+    } catch (error) {
+      setError("Error processing image. Please try again.");
+      console.error("Error processing image:", error);
+    }
+  }
+};
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
@@ -357,9 +379,9 @@ const ChromaFlow: React.FC = () => {
 
                 {processingState.showResults || originalImageSrc ? (
                   <div id="resultContainer">
-                    <div className="relative w-full overflow-hidden rounded-xl" style={{ maxHeight: '600px' }}>
+                    <div className="relative w-full overflow-hidden rounded-xl">
                       <img
-                        src={originalImageSrc || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=80"} // Fallback if originalImageSrc is null
+                      src={originalImageSrc || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=80"} // Fallback if originalImageSrc is null
                         alt="Original"
                         className="w-full h-auto block rounded-xl"
                       />

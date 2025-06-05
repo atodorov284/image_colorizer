@@ -9,6 +9,7 @@ from fastapi.responses import RedirectResponse, StreamingResponse
 from PIL import Image, ImageOps
 
 from .model_hub import ModelHub
+from utils.colorization_utils import ColorizationUtils
 
 
 class ModelType(str, Enum):
@@ -221,3 +222,47 @@ async def predict(model: ModelType, image: UploadFile):
     out_img.save(buffer, format="PNG")
     buffer.seek(0)
     return StreamingResponse(buffer, media_type="image/png")
+
+
+@app.post("/preview", 
+    summary="Get grayscale preview",
+    description="Returns the grayscale, resized version of the input image that will be fed to the model",
+    responses={
+        200: {
+            "description": "Grayscale preview image",
+            "content": {"image/png": {"example": "Binary PNG image data"}},
+        },
+        415: {
+            "description": "Unsupported image format or corrupted file",
+            "content": {
+                "application/json": {"example": {"detail": "Invalid image file."}}
+            },
+        },
+    },
+)
+async def preview(image: UploadFile):
+    """Generate grayscale preview using the same preprocessing as the model."""
+    try:
+        image.file.seek(0)
+        pil_img = Image.open(image.file)
+        pil_img = ImageOps.exif_transpose(pil_img)
+        pil_img = pil_img.convert("RGB")
+        
+        # Use the same preprocessing as the model
+        lll, _ = ColorizationUtils.preprocess_image(pil_img, MODEL_HUB.res_target_size)
+        
+        # Convert the L channel back to grayscale image
+        gray_img = Image.fromarray((lll[0].numpy() * 255).astype('uint8'))
+        
+        # Return the preview image
+        buffer = io.BytesIO()
+        gray_img.save(buffer, format="PNG")
+        buffer.seek(0)
+        
+        return StreamingResponse(buffer, media_type="image/png")
+        
+    except PIL.UnidentifiedImageError:
+        raise HTTPException(
+            status_code=415,
+            detail="Invalid image file. Please upload a valid image in JPEG, PNG, TIFF, BMP, WebP, or other PIL-supported format.",
+        )
