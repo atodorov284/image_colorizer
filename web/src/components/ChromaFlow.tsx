@@ -36,10 +36,14 @@ const ChromaFlow: React.FC = () => {
   });
   const [sliderValue, setSliderValue] = useState<number>(50);
   const [isDragActive, setIsDragActive] = useState<boolean>(false);
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [originalImageSrc, setOriginalImageSrc] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   // Refs
   const colorizedImageRef = useRef<HTMLImageElement>(null);
   const sliderHandleRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Model data
   const models: ModelCard[] = [
@@ -89,23 +93,86 @@ const ChromaFlow: React.FC = () => {
     setIsDragActive(false);
   };
 
+  const handleFileSelected = (file: File | undefined) => {
+    if (file) {
+      if (file.size > 10 * 1024 * 1024) { // 10MB limit
+        setError("File size exceeds 10MB. Please upload a smaller image.");
+        setUploadedFile(null);
+        setOriginalImageSrc(null);
+        return;
+      }
+      if (!['image/jpeg', 'image/png', 'image/bmp'].includes(file.type)) {
+        setError("Invalid file type. Please upload JPG, PNG, or BMP.");
+        setUploadedFile(null);
+        setOriginalImageSrc(null);
+        return;
+      }
+      setUploadedFile(file);
+      setOriginalImageSrc(URL.createObjectURL(file));
+      setError(null); // Clear previous errors
+      setProcessingState({ isProcessing: false, showResults: false }); // Reset results view
+      if (colorizedImageRef.current) {
+        colorizedImageRef.current.src = ""; // Clear previous colorized image
+      }
+    }
+  };
+
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragActive(false);
-    // Handle file drop logic here
-    console.log('Files dropped:', e.dataTransfer.files);
+    const file = e.dataTransfer.files?.[0];
+    handleFileSelected(file);
+    // console.log('Files dropped:', e.dataTransfer.files);
+  };
+
+  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    handleFileSelected(file);
   };
 
   // Colorize button handler
-  const handleColorize = () => {
+  const handleColorize = async () => {
+    if (!uploadedFile) {
+      setError("Please upload an image first.");
+      return;
+    }
+    setError(null);
     setProcessingState({ isProcessing: true, showResults: false });
-    
-    // Simulate processing
-    setTimeout(() => {
+
+    const getApiModelType = (modelId: string): string => {
+      if (modelId === 'histocolor') return 'vit';      // ViT (Fine-tuned)
+      if (modelId === 'landscape') return 'resnet';   // ResNet18 (Fine-tuned)
+      if (modelId === 'turbo') return 'quant';     // ViT (Quantized)
+      return 'vit'; // Default to vit
+    };
+
+    const formData = new FormData();
+    formData.append('image', uploadedFile);
+    formData.append('model_type', getApiModelType(selectedModel));
+
+    try {
+      const response = await fetch('http://localhost:8000/colorize_image/', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ detail: "Unknown error occurred during colorization." }));
+        throw new Error(errorData.detail || `HTTP error! status: ${response.status}`);
+      }
+
+      const imageBlob = await response.blob();
+      if (colorizedImageRef.current) {
+        colorizedImageRef.current.src = URL.createObjectURL(imageBlob);
+      }
       setProcessingState({ isProcessing: false, showResults: true });
       // Scroll to results
       document.getElementById('resultContainer')?.scrollIntoView({ behavior: 'smooth' });
-    }, 2500);
+    } catch (err: any) {
+      console.error("Error colorizing image:", err);
+      setError(err.message || "Failed to colorize image. Please try again.");
+      setProcessingState({ isProcessing: false, showResults: false });
+    }
   };
 
   return (
@@ -215,11 +282,39 @@ const ChromaFlow: React.FC = () => {
                   <i className="fas fa-cloud-upload-alt text-slate-400 text-5xl mb-4"></i>
                   <p className="text-xl font-medium mb-2">Drag & drop your photo here</p>
                   <p className="text-gray-400 mb-6">or</p>
-                  <button className="bg-gradient-to-r from-blue-500 to-pink-500 hover:opacity-90 px-6 py-3 rounded-full text-lg font-semibold transition">
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleFileInputChange}
+                    style={{ display: 'none' }}
+                    accept="image/jpeg,image/png,image/bmp"
+                  />
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    className="bg-gradient-to-r from-blue-500 to-pink-500 hover:opacity-90 px-6 py-3 rounded-full text-lg font-semibold transition"
+                  >
                     <i className="fas fa-search mr-2"></i> Browse Files
                   </button>
                   <p className="text-gray-500 mt-4 text-sm">Supported Formats: JPG, PNG, BMP (max 10MB)</p>
                 </div>
+
+                {uploadedFile && (
+                  <div className="mt-6 text-center p-4 bg-slate-700/30 rounded-lg">
+                    <p className="text-green-400 font-medium">
+                      <i className="fas fa-check-circle mr-2"></i>
+                      Image selected: {uploadedFile.name}
+                    </p>
+                    <p className="text-gray-400 text-sm">
+                      ({(uploadedFile.size / 1024 / 1024).toFixed(2)} MB)
+                    </p>
+                  </div>
+                )}
+
+                {error && (
+                  <div className="mt-4 text-center p-3 bg-red-500/20 rounded-lg">
+                    <p className="text-red-400"><i className="fas fa-exclamation-triangle mr-2"></i>{error}</p>
+                  </div>
+                )}
 
                 <div className="flex flex-wrap gap-3 mt-4 justify-center">
                   {[
@@ -241,8 +336,8 @@ const ChromaFlow: React.FC = () => {
               <div className="text-center my-12">
                 <button
                   onClick={handleColorize}
-                  disabled={processingState.isProcessing}
-                  className="bg-gradient-to-r from-blue-500 to-pink-500 hover:opacity-90 px-12 py-4 rounded-full text-xl font-semibold transition transform hover:-translate-y-1 relative shadow-lg shadow-red-400/30"
+                  disabled={processingState.isProcessing || !uploadedFile}
+                  className="bg-gradient-to-r from-blue-500 to-pink-500 hover:opacity-90 px-12 py-4 rounded-full text-xl font-semibold transition transform hover:-translate-y-1 relative shadow-lg shadow-red-400/30 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <i className="fas fa-magic mr-2"></i> Colorize Image
                   {processingState.isProcessing && (
@@ -260,17 +355,17 @@ const ChromaFlow: React.FC = () => {
                 </h3>
                 <p className="text-gray-400 mb-6">Drag the slider to compare original and colorized version</p>
 
-                {processingState.showResults ? (
+                {processingState.showResults || originalImageSrc ? (
                   <div id="resultContainer">
                     <div className="relative w-full overflow-hidden rounded-xl" style={{ maxHeight: '600px' }}>
                       <img
-                        src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=80"
+                        src={originalImageSrc || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=80"} // Fallback if originalImageSrc is null
                         alt="Original"
                         className="w-full h-auto block rounded-xl"
                       />
                       <img
                         ref={colorizedImageRef}
-                        src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=80"
+                        src={processingState.showResults && colorizedImageRef.current?.src ? colorizedImageRef.current.src : ""} // Keep existing src if available and results are shown
                         alt="Colorized"
                         className="absolute top-0 left-0 w-full h-auto block rounded-xl"
                         style={{ clipPath: `polygon(0 0, ${sliderValue}% 0, ${sliderValue}% 100%, 0% 100%)` }}
@@ -311,6 +406,9 @@ const ChromaFlow: React.FC = () => {
                     <i className="fas fa-images text-slate-400 text-5xl mb-6"></i>
                     <h4 className="text-xl font-semibold mb-3">Your Colorized Photo Appears Here</h4>
                     <p className="text-gray-500">Upload a photo and click "Colorize Image" to see the magic</p>
+                    {error && (
+                       <p className="text-red-400 mt-3"><i className="fas fa-exclamation-triangle mr-2"></i>{error}</p>
+                    )}
                   </div>
                 )}
               </div>
