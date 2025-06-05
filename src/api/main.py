@@ -1,17 +1,21 @@
-from fastapi import FastAPI, UploadFile, HTTPException
-from fastapi.responses import StreamingResponse, RedirectResponse
 import io
-import PIL
-from PIL import Image, ImageOps
 from enum import Enum
 from typing import Literal
 
+import PIL
+from fastapi import FastAPI, HTTPException, UploadFile
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import RedirectResponse, StreamingResponse
+from PIL import Image, ImageOps
+
 from .model_hub import ModelHub
+
 
 class ModelType(str, Enum):
     RESNET = "resnet"
     VIT = "vit"
     QUANT = "quant"
+
 
 MODEL_HUB = ModelHub()
 
@@ -117,9 +121,20 @@ All successful requests return a PNG image stream with:
     version="0.1.0",
 )
 
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allows all origins
+    allow_credentials=True,
+    allow_methods=["*"],  # Allows all methods
+    allow_headers=["*"],  # Allows all headers
+)
+
+
 @app.get("/", description="Root endpoint that redirects to API documentation.")
 async def root():
-    return RedirectResponse(url='/docs')
+    return RedirectResponse(url="/docs")
+
 
 @app.post(
     "/predict",
@@ -137,26 +152,22 @@ async def root():
     
     **Output**: High-quality PNG image with predicted colors applied to the original grayscale input.
     """,
-    responses={ 
+    responses={
         200: {
             "description": "Successfully colorized image",
-            "content": {"image/png": {"example": "Binary PNG image data"}}
+            "content": {"image/png": {"example": "Binary PNG image data"}},
         },
         415: {
             "description": "Unsupported image format or corrupted file",
             "content": {
-                "application/json": {
-                    "example": {"detail": "Invalid image file."}
-                }
-            }
+                "application/json": {"example": {"detail": "Invalid image file."}}
+            },
         },
         422: {
             "description": "Validation error",
             "content": {
-                "application/json": {
-                    "example": {"detail": "Invalid parameters"}
-                }
-            }
+                "application/json": {"example": {"detail": "Invalid parameters"}}
+            },
         },
         501: {
             "description": "Model not yet available",
@@ -164,49 +175,44 @@ async def root():
                 "application/json": {
                     "example": {"detail": "Selected model not available yet"}
                 }
-            }
-        }
+            },
+        },
     },
 )
-async def predict(
-    model: ModelType,
-    image: UploadFile
-):
+async def predict(model: ModelType, image: UploadFile):
     """
     Colorize a grayscale image using the specified model.
-    
+
     Args:
         model: Model to use for colorization ("resnet" or "vit")
         image: Uploaded image file in any PIL-supported format
-        
+
     Returns:
         StreamingResponse: PNG image with colorization applied
-        
+
     Raises:
         HTTPException: 415 if image file is invalid
         HTTPException: 501 if selected model is not available
     """
     if model == ModelType.VIT:
         raise HTTPException(
-            status_code=501,
-            detail="ViT model not trained yet – check back later!"
+            status_code=501, detail="ViT model not trained yet – check back later!"
         )
-    
+
     if model == ModelType.QUANT:
         raise HTTPException(
-            status_code=501,
-            detail="QUANT model not trained yet – check back later!"
+            status_code=501, detail="QUANT model not trained yet – check back later!"
         )
 
     try:
-        image.file.seek(0) 
+        image.file.seek(0)
         pil_img = Image.open(image.file)
         pil_img = ImageOps.exif_transpose(pil_img)
         pil_img = pil_img.convert("RGB")
     except PIL.UnidentifiedImageError:
         raise HTTPException(
-            status_code=415, 
-            detail="Invalid image file. Please upload a valid image in JPEG, PNG, TIFF, BMP, WebP, or other PIL-supported format."
+            status_code=415,
+            detail="Invalid image file. Please upload a valid image in JPEG, PNG, TIFF, BMP, WebP, or other PIL-supported format.",
         )
 
     out_img = MODEL_HUB.colorize_with_resnet(pil_img)
