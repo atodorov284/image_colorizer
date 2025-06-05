@@ -3,8 +3,15 @@ from fastapi.responses import StreamingResponse, RedirectResponse
 import io
 import PIL
 from PIL import Image, ImageOps
+from enum import Enum
+from typing import Literal
 
 from .model_hub import ModelHub
+
+class ModelType(str, Enum):
+    RESNET = "resnet"
+    VIT = "vit"
+    QUANT = "quant"
 
 MODEL_HUB = ModelHub()
 
@@ -115,10 +122,14 @@ async def root():
     return RedirectResponse(url='/docs')
 
 @app.post(
-    "/predict/resnet",
-    summary="Colorize image with ResNet-18 model",
+    "/predict",
+    summary="Colorize image with selected model",
     description="""
-    Upload a grayscale image and receive a colorized version using our trained ResNet-18 model.
+    Upload a grayscale image and specify the model to use for colorization.
+    
+    **Models available**:
+    - `resnet`: ResNet-18 based colorization (available)
+    - `vit`: Vision Transformer based colorization (coming soon)
     
     **Supported formats**: JPEG, PNG, TIFF, BMP, WebP, GIF (static), and other PIL-compatible formats.
     
@@ -140,28 +151,53 @@ async def root():
             }
         },
         422: {
-            "description": "Validation error - missing image field",
+            "description": "Validation error",
             "content": {
                 "application/json": {
-                    "example": {"detail": "Field 'image' is required"}
+                    "example": {"detail": "Invalid parameters"}
+                }
+            }
+        },
+        501: {
+            "description": "Model not yet available",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Selected model not available yet"}
                 }
             }
         }
     },
 )
-async def predict_resnet(image: UploadFile):
+async def predict(
+    model: ModelType,
+    image: UploadFile
+):
     """
-    Colorize a grayscale image using the ResNet-18 based colorization model.
+    Colorize a grayscale image using the specified model.
     
     Args:
-        image: Uploaded image file in any PIL-supported format (JPEG, PNG, TIFF, etc.)
+        model: Model to use for colorization ("resnet" or "vit")
+        image: Uploaded image file in any PIL-supported format
         
     Returns:
         StreamingResponse: PNG image with colorization applied
         
     Raises:
-        HTTPException: 415 if image file is invalid or unsupported
+        HTTPException: 415 if image file is invalid
+        HTTPException: 501 if selected model is not available
     """
+    if model == ModelType.VIT:
+        raise HTTPException(
+            status_code=501,
+            detail="ViT model not trained yet – check back later!"
+        )
+    
+    if model == ModelType.QUANT:
+        raise HTTPException(
+            status_code=501,
+            detail="QUANT model not trained yet – check back later!"
+        )
+
     try:
         image.file.seek(0) 
         pil_img = Image.open(image.file)
@@ -179,39 +215,3 @@ async def predict_resnet(image: UploadFile):
     out_img.save(buffer, format="PNG")
     buffer.seek(0)
     return StreamingResponse(buffer, media_type="image/png")
-
-
-@app.post(
-    "/predict/vit",
-    summary="Colorize image with Vision Transformer model",
-    description="""
-    **🚧 Coming Soon**: Vision Transformer based colorization model.
-    
-    This endpoint will provide state-of-the-art colorization using transformer architecture
-    once model training is completed.
-    """,
-    responses={
-        501: {
-            "description": "Model not yet available",
-            "content": {
-                "application/json": {
-                    "example": {"detail": "ViT model not trained yet – check back later!"}
-                }
-            }
-        }
-    },
-)
-async def predict_vit(image: UploadFile):
-    """
-    Vision Transformer colorization endpoint (not yet implemented).
-    
-    Args:
-        image: Uploaded image file
-        
-    Raises:
-        HTTPException: 501 - Model not available yet
-    """
-    raise HTTPException(
-        status_code=501,
-        detail="ViT model not trained yet – check back later!"
-    )
