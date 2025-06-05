@@ -1,18 +1,19 @@
+import os
+
 import torch
 import yaml
-import os
-from tqdm import tqdm
 from PIL import Image
 import numpy as np
 from torchvision import transforms
 from skimage import color
 import matplotlib.pyplot as plt
 import warnings
+import tqdm
 
 from models.resnet import ResNetColorizationModel
-from utils.predicting_utils import PredictingUtils
+from models.vit import ViTColorizationModel
 from utils.colorization_utils import ColorizationUtils
-
+from utils.predicting_utils import PredictingUtils
 
 def generate_random_ab(hw):
     """Generate random **ab** channels in [-127, 128] with shape (2, H, W)."""
@@ -20,7 +21,7 @@ def generate_random_ab(hw):
 
 
 if __name__ == "__main__":
-    with open("src/configs/resnet_config.yaml", "r") as file:
+    with open("src/configs/vit_config.yaml", "r") as file:
         config = yaml.safe_load(file)
 
     device = (
@@ -33,7 +34,7 @@ if __name__ == "__main__":
 
     print(f"Using device: {device}")
 
-    model_ckpt_path = f"{config["output"]["best_model_dir"]}/best_model.pth"
+    model_ckpt_path = f"{config['output']['best_model_dir']}/best_model.pth"
     if config["model"]["name"] == "resnet":
         if os.path.exists(model_ckpt_path):
             model = ResNetColorizationModel(pretrained=False)
@@ -42,9 +43,14 @@ if __name__ == "__main__":
             model.to(device)
             model.eval()
             print("Model loaded successfully.")
-        else:
-            print("Model file not found. Please check the path.")
-            raise FileNotFoundError(model_ckpt_path)
+    elif config["model"]["name"] == "vit":
+        if os.path.exists(model_ckpt_path):
+            model = ViTColorizationModel(pretrained=False)
+            state = torch.load(model_ckpt_path, map_location=device)
+            model.load_state_dict(state)
+            model.to(device)
+            model.eval()
+            print("Model loaded successfully.")
 
     img_paths = PredictingUtils.collect_images(config["testing"]["test_dir"], config["testing"]["subset_percent"])
     if not config["testing"]["visualisation"]:

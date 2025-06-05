@@ -153,6 +153,7 @@ class ColorizationPipeline(BasePipeline):
         Runs the full training loop with early stopping.
         """
         num_epochs = self.config["training"]["num_epochs"]
+        model_name = self.config["model"]["name"]
         print(f"Starting training for {num_epochs} epochs...")
 
         start_time = datetime.now()
@@ -168,7 +169,7 @@ class ColorizationPipeline(BasePipeline):
             'val_loss': val_loss,
             'wall_time': (end_time - start_time).total_seconds()
             }
-            ckpt_name = f"resnet_epoch_{epoch:03d}.pth"
+            ckpt_name = f"{model_name}_epoch_{epoch:03d}.pth"
             ckpt_path = os.path.join(self.checkpoint_dir, ckpt_name)
             torch.save(checkpoint, ckpt_path)
 

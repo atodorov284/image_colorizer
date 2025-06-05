@@ -1,15 +1,17 @@
-import os, json, hashlib
+import hashlib
+import json
+import os
 from typing import Tuple
 
 import torch
 from PIL import Image
+from pycocotools.coco import COCO
 from torch.utils.data import Dataset
+from tqdm import tqdm
 
 from utils.colorization_utils import ColorizationUtils
 from utils.filtering_utils import FiltersUtils
 
-from tqdm import tqdm
-from pycocotools.coco import COCO
 
 class ColorizationDataset(Dataset):
     """
@@ -22,8 +24,11 @@ class ColorizationDataset(Dataset):
     """
 
     def __init__(
-        self, root_dir: str, captions_dir: str, target_size: Tuple[int, int] = (256, 256),
-        cache_path: str = ".filtered_images.json"
+        self,
+        root_dir: str,
+        captions_dir: str,
+        target_size: Tuple[int, int] = (224, 224),
+        cache_path: str = ".filtered_images.json",
     ) -> None:
         """Constructor for ColorizationDataset."""
         self.root_dir: str = root_dir
@@ -45,13 +50,16 @@ class ColorizationDataset(Dataset):
         self.image_files = self._build_filelist(captions_dir)
 
         with open(self.cache_path, "w") as f:
-            json.dump({"fingerprint": self._fingerprint(),
-                       "image_files": self.image_files}, f)
+            json.dump(
+                {"fingerprint": self._fingerprint(), "image_files": self.image_files}, f
+            )
         print(f"Cache saved to {self.cache_path} for future runs.")
 
     def _build_filelist(self, captions_dir):
         all_image_files: list[str] = [
-            f for f in os.listdir(self.root_dir) if os.path.isfile(os.path.join(self.root_dir, f))
+            f
+            for f in os.listdir(self.root_dir)
+            if os.path.isfile(os.path.join(self.root_dir, f))
         ]
         coco = COCO(captions_dir)
         kept = []
@@ -68,10 +76,14 @@ class ColorizationDataset(Dataset):
 
     def _fingerprint(self):
         md5 = hashlib.md5()
-        for name in sorted(f for f in os.listdir(self.root_dir) if os.path.isfile(os.path.join(self.root_dir, f))):
+        for name in sorted(
+            f
+            for f in os.listdir(self.root_dir)
+            if os.path.isfile(os.path.join(self.root_dir, f))
+        ):
             md5.update(name.encode())
         return md5.hexdigest()
-    
+
     def __len__(self) -> int:
         """Returns the total number of images in the dataset."""
         return len(self.image_files)
