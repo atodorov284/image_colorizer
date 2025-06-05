@@ -44,24 +44,24 @@ const ChromaFlow: React.FC = () => {
   // Model data
   const models: ModelCard[] = [
     {
+      id: 'landscape',
+      name: 'ResNet18 (Fine-tuned)',
+      description: 'ResNet18 model, pre-trained and fine-tuned for balanced performance.',
+      icon: 'fas fa-cogs',
+      gradient: 'from-green-400 to-teal-500'
+    },
+    {
       id: 'histocolor',
-      name: 'HistoColor Pro',
-      description: 'Best for historical portraits with accurate skin tones.',
-      icon: 'fas fa-crown',
+      name: 'ViT (Fine-tuned)',
+      description: 'Vision Transformer model, pre-trained and fine-tuned for robust colorization.',
+      icon: 'fas fa-brain',
       gradient: 'from-red-400 to-pink-500',
       isRecommended: true
     },
     {
-      id: 'landscape',
-      name: 'Landscape AI',
-      description: 'Optimized for landscapes, nature scenes, and architecture.',
-      icon: 'fas fa-mountain',
-      gradient: 'from-green-400 to-teal-500'
-    },
-    {
       id: 'turbo',
-      name: 'TurboColor',
-      description: 'Fastest processing for quick results. Good for snapshots.',
+      name: 'ViT (Quantized)',
+      description: 'Quantized version of the ViT model for faster inference with minimal quality loss.',
       icon: 'fas fa-bolt',
       gradient: 'from-purple-500 to-indigo-600'
     }
@@ -141,14 +141,14 @@ const ChromaFlow: React.FC = () => {
           <div className="container mx-auto px-4">
             <div className="max-w-3xl mx-auto">
               <h2 className="text-5xl md:text-6xl font-[1000] mb-6">
-                Transform Black & White Photos to <span className="text-red-400">Vibrant Colors</span>
+                Exploring Deep Learning Image <span className="text-red-400">Colorization</span>
               </h2>
               <p className="text-xl text-gray-300 mb-10">
-                Bring your historical memories to life with our advanced AI-powered colorization technology
+                Image colorization using different deep learning models.
               </p>
               <div className="flex flex-col md:flex-row justify-center space-y-4 md:space-y-0 md:space-x-6">
                 <button className="bg-gradient-to-r from-blue-500 to-pink-500 hover:opacity-90 px-8 py-4 rounded-full text-lg font-semibold transition transform hover:-translate-y-1">
-                  Colorize Your Photos
+                  Try Colorizing an Image
                 </button>
                 <button className="bg-slate-600 hover:bg-opacity-80 px-8 py-4 rounded-full text-lg font-semibold transition transform hover:-translate-y-1">
                   <i className="fas fa-images mr-2"></i> View Examples
@@ -188,7 +188,7 @@ const ChromaFlow: React.FC = () => {
                         <p className="text-gray-300 text-sm">{model.description}</p>
                         {model.isRecommended && (
                           <div className="mt-4">
-                            <span className="text-sm bg-red-400/30 py-1 px-3 rounded-full">Recommended</span>
+                            <span className="text-sm bg-red-400/30 py-1 px-3 rounded-full">Base Model</span>
                           </div>
                         )}
                       </div>
@@ -223,7 +223,7 @@ const ChromaFlow: React.FC = () => {
 
                 <div className="flex flex-wrap gap-3 mt-4 justify-center">
                   {[
-                    { icon: 'fas fa-user', label: 'Portrait Examples' },
+                    { icon: 'fas fa-user', label: 'Portraits' },
                     { icon: 'fas fa-building', label: 'Architecture' },
                     { icon: 'fas fa-tree', label: 'Landscapes' }
                   ].map((item, index) => (
@@ -321,25 +321,25 @@ const ChromaFlow: React.FC = () => {
         {/* Features Section */}
         <section className="py-16 bg-gradient-to-b from-slate-800 to-slate-900">
           <div className="container mx-auto px-4">
-            <h2 className="text-4xl font-[1000] mb-16 text-center">Why Choose ChromaFlow?</h2>
+            <h2 className="text-4xl font-[1000] mb-16 text-center">Project Highlights</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-10 max-w-6xl mx-auto">
               {[
                 {
-                  icon: 'fas fa-brain',
-                  title: 'Advanced AI Technology',
-                  description: 'Our neural networks are trained on millions of images for exceptional color accuracy and realistic results.',
+                  icon: 'fas fa-layer-group',
+                  title: 'Multiple Model Architectures',
+                  description: 'Explore colorization with different model backbones like Vision Transformers (ViT) and ResNet.',
                   gradient: 'from-blue-500 to-pink-500'
                 },
                 {
                   icon: 'fas fa-bolt',
-                  title: 'Lightning Fast Processing',
-                  description: 'Get colorized results in seconds, not hours. Our optimized algorithms deliver speed without sacrificing quality.',
+                  title: 'Efficient Processing',
+                  description: 'Includes a quantized ViT model for faster inference, demonstrating a trade-off between speed and precision.',
                   gradient: 'from-red-400 to-orange-500'
                 },
                 {
-                  icon: 'fas fa-lock',
-                  title: 'Privacy Guaranteed',
-                  description: 'Your images are never stored or shared. We prioritize your privacy with secure, encrypted processing.',
+                  icon: 'fas fa-palette',
+                  title: 'Interactive Comparison',
+                  description: 'Visually compare the original black and white image with the colorized output using an interactive slider.',
                   gradient: 'from-purple-500 to-indigo-600'
                 }
               ].map((feature, index) => (
@@ -372,7 +372,7 @@ const ChromaFlow: React.FC = () => {
               <div>
                 <h3 className="text-lg font-semibold mb-4">Quick Links</h3>
                 <ul className="space-y-2">
-                  {['Home', 'Gallery', 'Pricing', 'API Access'].map((link) => (
+                  {['Home', 'Gallery', 'About'].map((link) => (
                     <li key={link}>
                       <a href="#" className="text-gray-400 hover:text-red-400 transition">{link}</a>
                     </li>
@@ -381,9 +381,9 @@ const ChromaFlow: React.FC = () => {
               </div>
 
               <div>
-                <h3 className="text-lg font-semibold mb-4">Legal</h3>
+                <h3 className="text-lg font-semibold mb-4">Resources</h3>
                 <ul className="space-y-2">
-                  {['Privacy Policy', 'Terms of Service', 'Copyright Info'].map((link) => (
+                  {['GitHub Repository', 'Paper (if any)', 'Model Details'].map((link) => (
                     <li key={link}>
                       <a href="#" className="text-gray-400 hover:text-red-400 transition">{link}</a>
                     </li>
@@ -413,7 +413,7 @@ const ChromaFlow: React.FC = () => {
             </div>
 
             <div className="border-t border-gray-800 mt-10 pt-6 text-center text-gray-600">
-              <p>© 2023 ChromaFlow. All rights reserved.</p>
+              <p>© 2023 AML Project. Content for demonstration purposes.</p>
             </div>
           </div>
         </footer>
