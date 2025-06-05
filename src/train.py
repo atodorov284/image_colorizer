@@ -3,10 +3,11 @@ import yaml
 
 # Adjust imports based on final structure
 from models.resnet import ResNetColorizationModel
+from models.vit import ViTColorizationModel
 from pipelines.colorization_pipeline import ColorizationPipeline
 
 if __name__ == "__main__":
-    with open("src/configs/resnet_config.yaml", "r") as file:
+    with open("src/configs/vit_config.yaml", "r") as file:
         config = yaml.safe_load(file)
     device = (
         "mps"
@@ -26,7 +27,9 @@ if __name__ == "__main__":
     elif config["model"]["name"] == "vit":
         # model_instance = ViTColorizationModel()
         print("Using ViT model.")
-        raise NotImplementedError
+        model_instance = ViTColorizationModel(
+            pretrained=config["model"]["pretrained"],
+        )
     else:
         raise ValueError(f"Unknown model type: {config['model']['name']}")
 
