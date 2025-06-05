@@ -13,6 +13,7 @@ declare global {
       };
     }
   }
+
   
   // Global color palette constants
   export const COLORS = {

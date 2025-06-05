@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import Head from 'next/head';
+
 
 // Global type definitions
 declare global {
@@ -110,15 +110,6 @@ const ChromaFlow: React.FC = () => {
 
   return (
     <>
-      <Head>
-        <title>ChromaFlow | Image Colorizer</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
-        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-      </Head>
-
       <div className="bg-gradient-to-br from-slate-900 to-slate-800 min-h-screen text-white font-sans">
         {/* Header */}
         <header className="py-6">
@@ -149,7 +140,7 @@ const ChromaFlow: React.FC = () => {
         <section className="py-16 text-center bg-gradient-to-r from-blue-500/10 to-pink-500/10">
           <div className="container mx-auto px-4">
             <div className="max-w-3xl mx-auto">
-              <h2 className="text-5xl md:text-6xl font-bold mb-6">
+              <h2 className="text-5xl md:text-6xl font-[1000] mb-6">
                 Transform Black & White Photos to <span className="text-red-400">Vibrant Colors</span>
               </h2>
               <p className="text-xl text-gray-300 mb-10">
@@ -330,7 +321,7 @@ const ChromaFlow: React.FC = () => {
         {/* Features Section */}
         <section className="py-16 bg-gradient-to-b from-slate-800 to-slate-900">
           <div className="container mx-auto px-4">
-            <h2 className="text-4xl font-bold mb-16 text-center">Why Choose ChromaFlow?</h2>
+            <h2 className="text-4xl font-[1000] mb-16 text-center">Why Choose ChromaFlow?</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-10 max-w-6xl mx-auto">
               {[
                 {
