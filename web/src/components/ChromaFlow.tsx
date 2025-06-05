@@ -118,7 +118,7 @@ const ChromaFlow: React.FC = () => {
               <div className="bg-gradient-to-r from-blue-500 to-pink-500 w-12 h-12 rounded-full flex items-center justify-center">
                 <i className="fas fa-palette text-white text-2xl"></i>
               </div>
-              <h1 className="text-3xl font-bold ml-3">
+              <h1 className="text-3xl font-[900] ml-3">
                 Chroma<span className="text-red-400">Flow</span>
               </h1>
             </div>
