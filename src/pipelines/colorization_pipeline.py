@@ -109,11 +109,11 @@ class ColorizationPipeline(BasePipeline):
 
     def setup_optimizer_criterion(self) -> None:
         self.criterion = nn.CrossEntropyLoss(weight=self.rebalancing_weights)
-        self.optimizer = optim.Adam(
+        self.optimizer = optim.AdamW(
             self.model.parameters(), lr=self.config["training"]["learning_rate"]
         )
         print(
-            "Optimizer (Adam) and Criterion (CrossEntropyLoss with rebalancing) setup."
+            "Optimizer (AdamW) and Criterion (CrossEntropyLoss with rebalancing) setup."
         )
 
     def train_epoch(self, epoch_num: int) -> float:
@@ -147,7 +147,7 @@ class ColorizationPipeline(BasePipeline):
 
         with torch.no_grad():
             for lll_inputs, ab_targets_continuous in tqdm(
-                self.train_loader, desc="Evaluating", leave=False
+                self.val_loader, desc="Evaluating", leave=False
             ):
                 lll_inputs = lll_inputs.to(self.device)
                 target_class_indices = ColorizationUtils.ab_to_class_indices(
