@@ -32,6 +32,11 @@ if __name__ == "__main__":
         )
     else:
         raise ValueError(f"Unknown model type: {config['model']['name']}")
+    
+    if torch.cuda.device_count() > 1:
+        print(f"Using {torch.cuda.device_count()} GPUs")
+        model_instance = torch.nn.DataParallel(model_instance, device_ids=list(range(torch.cuda.device_count())))
+    
 
     pipeline = ColorizationPipeline(config, model_instance, device)
 
