@@ -6,89 +6,101 @@ from models.base_model import BaseColorizationModel
 from utils.colorization_utils import ColorizationUtils
 
 
+def make_conv_relu_bn_block(
+    in_channels: int,
+    out_channels: int,
+    n: int,
+    kernel_size: int = 3,
+    stride: int = 1,
+    padding: int = 1,
+    dilation: int = 1,
+    bias: bool = True,
+) -> nn.Sequential:
+    layers = nn.ModuleList()
+    for i in range(n):
+        layers.append(
+            nn.Conv2d(
+                in_channels if i == 0 else out_channels,
+                out_channels,
+                kernel_size=kernel_size,
+                stride=stride if i == n - 1 else 1,
+                padding=padding,
+                dilation=dilation,
+                bias=True,
+            )
+        )
+        layers.append(nn.ReLU(True))
+    layers.append(nn.BatchNorm2d(out_channels))
+    return nn.Sequential(*layers)
+
+
 class VGGColorizationModel(BaseColorizationModel):
     def __init__(self, pretrained: bool = True):
         super().__init__()
 
-        self.model1 = nn.Sequential(
-            nn.Conv2d(1, 64, kernel_size=3, stride=1, padding=1, bias=True),
-            nn.ReLU(True),
-            nn.Conv2d(64, 64, kernel_size=3, stride=2, padding=1, bias=True),
-            nn.ReLU(True),
-            nn.BatchNorm2d(64),
+        self.feature_blocks = nn.ModuleList(
+            [
+                make_conv_relu_bn_block(
+                    in_channels=1,
+                    out_channels=64,
+                    n=2,
+                    kernel_size=3,
+                    stride=2,
+                    padding=1,
+                ),
+                make_conv_relu_bn_block(
+                    in_channels=64,
+                    out_channels=128,
+                    n=2,
+                    kernel_size=3,
+                    stride=2,
+                    padding=1,
+                ),
+                make_conv_relu_bn_block(
+                    in_channels=128,
+                    out_channels=256,
+                    n=3,
+                    kernel_size=3,
+                    stride=2,
+                    padding=1,
+                ),
+                make_conv_relu_bn_block(
+                    in_channels=256,
+                    out_channels=512,
+                    n=3,
+                    kernel_size=3,
+                    stride=1,
+                    padding=1,
+                ),
+                make_conv_relu_bn_block(
+                    in_channels=512,
+                    out_channels=512,
+                    n=3,
+                    kernel_size=3,
+                    stride=1,
+                    padding=2,
+                    dilation=2,
+                ),
+                make_conv_relu_bn_block(
+                    in_channels=512,
+                    out_channels=512,
+                    n=3,
+                    kernel_size=3,
+                    stride=1,
+                    padding=2,
+                    dilation=2,
+                ),
+                make_conv_relu_bn_block(
+                    in_channels=512,
+                    out_channels=512,
+                    n=3,
+                    kernel_size=3,
+                    stride=1,
+                    padding=1,
+                ),
+            ]
         )
-
-        self.model2 = nn.Sequential(
-            nn.Conv2d(64, 128, kernel_size=3, stride=1, padding=1, bias=True),
-            nn.ReLU(True),
-            nn.Conv2d(128, 128, kernel_size=3, stride=2, padding=1, bias=True),
-            nn.ReLU(True),
-            nn.BatchNorm2d(128),
-        )
-
-        self.model3 = nn.Sequential(
-            nn.Conv2d(128, 256, kernel_size=3, stride=1, padding=1, bias=True),
-            nn.ReLU(True),
-            nn.Conv2d(256, 256, kernel_size=3, stride=1, padding=1, bias=True),
-            nn.ReLU(True),
-            nn.Conv2d(256, 256, kernel_size=3, stride=2, padding=1, bias=True),
-            nn.ReLU(True),
-            nn.BatchNorm2d(256),
-        )
-
-        self.model4 = nn.Sequential(
-            nn.Conv2d(256, 512, kernel_size=3, stride=1, padding=1, bias=True),
-            nn.ReLU(True),
-            nn.Conv2d(512, 512, kernel_size=3, stride=1, padding=1, bias=True),
-            nn.ReLU(True),
-            nn.Conv2d(512, 512, kernel_size=3, stride=1, padding=1, bias=True),
-            nn.ReLU(True),
-            nn.BatchNorm2d(512),
-        )
-
-        self.model5 = nn.Sequential(
-            nn.Conv2d(
-                512, 512, kernel_size=3, dilation=2, stride=1, padding=2, bias=True
-            ),
-            nn.ReLU(True),
-            nn.Conv2d(
-                512, 512, kernel_size=3, dilation=2, stride=1, padding=2, bias=True
-            ),
-            nn.ReLU(True),
-            nn.Conv2d(
-                512, 512, kernel_size=3, dilation=2, stride=1, padding=2, bias=True
-            ),
-            nn.ReLU(True),
-            nn.BatchNorm2d(512),
-        )
-
-        self.model6 = nn.Sequential(
-            nn.Conv2d(
-                512, 512, kernel_size=3, dilation=2, stride=1, padding=2, bias=True
-            ),
-            nn.ReLU(True),
-            nn.Conv2d(
-                512, 512, kernel_size=3, dilation=2, stride=1, padding=2, bias=True
-            ),
-            nn.ReLU(True),
-            nn.Conv2d(
-                512, 512, kernel_size=3, dilation=2, stride=1, padding=2, bias=True
-            ),
-            nn.ReLU(True),
-            nn.BatchNorm2d(512),
-        )
-
-        self.model7 = nn.Sequential(
-            nn.Conv2d(512, 512, kernel_size=3, stride=1, padding=1, bias=True),
-            nn.ReLU(True),
-            nn.Conv2d(512, 512, kernel_size=3, stride=1, padding=1, bias=True),
-            nn.ReLU(True),
-            nn.Conv2d(512, 512, kernel_size=3, stride=1, padding=1, bias=True),
-            nn.ReLU(True),
-            nn.BatchNorm2d(512),
-        )
-
-        self.model8 = nn.Sequential(
+        self.transpose_conv = nn.Sequential(
             nn.ConvTranspose2d(512, 256, kernel_size=4, stride=2, padding=1, bias=True),
             nn.ReLU(True),
             nn.Conv2d(256, 256, kernel_size=3, stride=1, padding=1, bias=True),
@@ -104,9 +116,7 @@ class VGGColorizationModel(BaseColorizationModel):
                 bias=True,
             ),
         )
-
-        self.softmax = nn.Softmax(dim=1)
-        self.model_out = nn.Conv2d(
+        self.regression_head = nn.Conv2d(
             ColorizationUtils.NUM_AB_BINS,
             2,
             kernel_size=1,
@@ -115,38 +125,57 @@ class VGGColorizationModel(BaseColorizationModel):
             stride=1,
             bias=False,
         )
-        self.upsample4 = nn.Upsample(scale_factor=4, mode="bilinear")
+        self.upsample_layer = nn.Upsample(scale_factor=4, mode="bilinear")
 
         if pretrained:
             vgg = vgg16(weights=VGG16_Weights.DEFAULT)
             vgg_features = vgg.features
-            # model1: first conv (1->64), second conv (64->64)
-            # model2: third conv (64->128), fourth conv (128->128)
-            # Copy weights for model1[0] from vgg_features[0] (avg RGB)
-            vgg_conv1_weight = vgg_features[0].weight.data  # (64, 3, 3, 3)
-            vgg_conv1_bias = vgg_features[0].bias.data
-            # Average across RGB channels
-            avg_weight = vgg_conv1_weight.mean(dim=1, keepdim=True)  # (64, 1, 3, 3)
-            self.model1[0].weight.data.copy_(avg_weight)
-            self.model1[0].bias.data.copy_(vgg_conv1_bias)
-            # model1[2] <- vgg_features[2], model2[0] <- vgg_features[5], model2[2] <- vgg_features[7]
-            self.model1[2].weight.data.copy_(vgg_features[2].weight.data)
-            self.model1[2].bias.data.copy_(vgg_features[2].bias.data)
-            self.model2[0].weight.data.copy_(vgg_features[5].weight.data)
-            self.model2[0].bias.data.copy_(vgg_features[5].bias.data)
-            self.model2[2].weight.data.copy_(vgg_features[7].weight.data)
-            self.model2[2].bias.data.copy_(vgg_features[7].bias.data)
+            vgg_conv_indices = [
+                0,
+                2,
+                5,
+                7,
+                10,
+                12,
+                14,
+                17,
+                19,
+                21,
+                24,
+                26,
+                28,
+            ]  # Conv2d layers in VGG16
+            vgg_ptr = 0
+            for block_idx, block in enumerate(self.feature_blocks):
+                for layer_idx, layer in enumerate(block):
+                    if isinstance(layer, nn.Conv2d):
+                        if block_idx == 0 and layer_idx == 0:
+                            # Special case: first conv, average RGB weights
+                            vgg_conv1_weight = vgg_features[
+                                vgg_conv_indices[vgg_ptr]
+                            ].weight.data
+                            vgg_conv1_bias = vgg_features[
+                                vgg_conv_indices[vgg_ptr]
+                            ].bias.data
+                            avg_weight = vgg_conv1_weight.mean(dim=1, keepdim=True)
+                            layer.weight.data.copy_(avg_weight)
+                            layer.bias.data.copy_(vgg_conv1_bias)
+                        else:
+                            vgg_ptr += 1
+                            if vgg_ptr >= len(vgg_conv_indices):
+                                # Handle case where there are more feature blocks than VGG16 layers
+                                break
+                            layer.weight.data.copy_(
+                                vgg_features[vgg_conv_indices[vgg_ptr]].weight.data
+                            )
+                            layer.bias.data.copy_(
+                                vgg_features[vgg_conv_indices[vgg_ptr]].bias.data
+                            )
 
-    def forward(self, input_l):
-        input_l = input_l[:, :1, :, :]
-        conv1_2 = self.model1(ColorizationUtils.normalize_l_channel(input_l))
-        conv2_2 = self.model2(conv1_2)
-        conv3_3 = self.model3(conv2_2)
-        conv4_3 = self.model4(conv3_3)
-        conv5_3 = self.model5(conv4_3)
-        conv6_3 = self.model6(conv5_3)
-        conv7_3 = self.model7(conv6_3)
-        conv8_3 = self.model8(conv7_3)
-        out_reg = self.model_out(self.softmax(conv8_3))
-
-        return ColorizationUtils.unnormalize_ab_channels(self.upsample4(out_reg))
+    def forward(self, x_lll: torch.Tensor) -> torch.Tensor:
+        x = x_lll[:, :1, :, :]
+        x = ColorizationUtils.normalize_l_channel(x)
+        for block in self.feature_blocks:
+            x = block(x)
+        out_reg = self.regression_head(nn.Softmax(dim=1)(self.transpose_conv(x)))
+        return ColorizationUtils.unnormalize_ab_channels(self.upsample_layer(out_reg))

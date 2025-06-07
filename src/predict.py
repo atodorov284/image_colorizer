@@ -65,6 +65,9 @@ if __name__ == "__main__":
             model.eval()
             print("Model loaded successfully.")
 
+    print(model)
+    print(f"Number of parameters: {sum(p.numel() for p in model.parameters())}")
+
     img_paths = PredictingUtils.collect_images(
         config["testing"]["test_dir"], config["testing"]["subset_percent"]
     )

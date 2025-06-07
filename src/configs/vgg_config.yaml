@@ -29,8 +29,8 @@ training:
   visualization_epoch_interval: 50
 
 testing:
-  test_dir: ./data/test2017
-  subset_percent: 0.05
+  test_dir: ./custom_tests
+  subset_percent: 1.0
   predicted_image_dir: ./test/colorised_images_vgg
   visualisation: True
   visualisation_dir: ./test/visualisations_vgg

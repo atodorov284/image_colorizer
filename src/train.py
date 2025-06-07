@@ -31,18 +31,21 @@ if __name__ == "__main__":
             pretrained=config["model"]["pretrained"],
         )
     elif config["model"]["name"] == "vgg":
-        model_instance = VGGColorizationModel(
-            pretrained=config["model"]["pretrained"]
-        )
+        model_instance = VGGColorizationModel(pretrained=config["model"]["pretrained"])
         print("Using VGG model.")
     else:
         raise ValueError(f"Unknown model type: {config['model']['name']}")
-    
+
     if torch.cuda.device_count() > 1:
         print(f"Using {torch.cuda.device_count()} GPUs")
-        model_instance = torch.nn.DataParallel(model_instance, device_ids=list(range(torch.cuda.device_count())))
-    
+        model_instance = torch.nn.DataParallel(
+            model_instance, device_ids=list(range(torch.cuda.device_count()))
+        )
+
     print(model_instance)
+    print(
+        f"Number of parameters: {sum(p.numel() for p in model_instance.parameters())}"
+    )
 
     pipeline = ColorizationPipeline(config, model_instance, device)
 
