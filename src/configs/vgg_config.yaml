@@ -3,8 +3,8 @@ data:
   val_dir: ./data/val2017
   train_captions_dir: ./data/annotations/captions_train2017.json
   val_captions_dir: ./data/annotations/captions_val2017.json
-  train_cache_path: ./data/train_filtered_vgg.json
-  val_cache_path: ./data/val_filtered_vgg.json
+  train_cache_path: ./data/train_filtered.json
+  val_cache_path: ./data/val_filtered.json
   image_size:
     - 224
     - 224

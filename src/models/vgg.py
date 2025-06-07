@@ -109,6 +109,26 @@ class VGGColorizationModel(BaseColorizationModel):
         )
         self.upsample4 = nn.Upsample(scale_factor=4, mode="bilinear")
 
+        if pretrained:
+            vgg = vgg16(weights=VGG16_Weights.DEFAULT)
+            vgg_features = vgg.features
+            # model1: first conv (1->64), second conv (64->64)
+            # model2: third conv (64->128), fourth conv (128->128)
+            # Copy weights for model1[0] from vgg_features[0] (avg RGB)
+            vgg_conv1_weight = vgg_features[0].weight.data  # (64, 3, 3, 3)
+            vgg_conv1_bias = vgg_features[0].bias.data
+            # Average across RGB channels
+            avg_weight = vgg_conv1_weight.mean(dim=1, keepdim=True)  # (64, 1, 3, 3)
+            self.model1[0].weight.data.copy_(avg_weight)
+            self.model1[0].bias.data.copy_(vgg_conv1_bias)
+            # model1[2] <- vgg_features[2], model2[0] <- vgg_features[5], model2[2] <- vgg_features[7]
+            self.model1[2].weight.data.copy_(vgg_features[2].weight.data)
+            self.model1[2].bias.data.copy_(vgg_features[2].bias.data)
+            self.model2[0].weight.data.copy_(vgg_features[5].weight.data)
+            self.model2[0].bias.data.copy_(vgg_features[5].bias.data)
+            self.model2[2].weight.data.copy_(vgg_features[7].weight.data)
+            self.model2[2].bias.data.copy_(vgg_features[7].bias.data)
+
     def forward(self, input_l):
         input_l = input_l[:, :1, :, :]
         conv1_2 = self.model1(self.normalize_l(input_l))

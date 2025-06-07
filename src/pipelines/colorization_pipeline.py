@@ -62,7 +62,9 @@ class ColorizationPipeline(BasePipeline):
         )
 
         if os.path.exists(weights_cache_path):
-            self.rebalancing_weights = torch.load(weights_cache_path).to(self.device)
+            self.rebalancing_weights = torch.load(
+                weights_cache_path, map_location=self.device
+            )
         else:
             self.rebalancing_weights = ColorizationUtils.calculate_rebalancing_weights(
                 weights_dataloader, self.ab_bins, lambda_rebal, sigma_smooth_rebal
@@ -91,8 +93,6 @@ class ColorizationPipeline(BasePipeline):
             )
             train_dataset = Subset(train_dataset, indices_train)
 
-        num_workers = os.cpu_count() // (torch.cuda.device_count())
-
         self.train_loader = DataLoader(
             train_dataset,
             batch_size=self.config["training"]["batch_size"],
@@ -111,7 +111,7 @@ class ColorizationPipeline(BasePipeline):
         )
 
     def setup_optimizer_criterion(self) -> None:
-        self.criterion = nn.CrossEntropyLoss()
+        self.criterion = nn.CrossEntropyLoss(weight=self.rebalancing_weights)
         self.optimizer = optim.AdamW(
             self.model.parameters(),
             lr=self.config["training"]["learning_rate"],
