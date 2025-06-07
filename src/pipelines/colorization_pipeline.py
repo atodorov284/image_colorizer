@@ -90,27 +90,33 @@ class ColorizationPipeline(BasePipeline):
                 f"Using {num_samples_train} samples ({subset_percent * 100:.1f}%) from the training dataset."
             )
 
+        num_workers = os.cpu_count() // (torch.cuda.device_count())
+
         self.train_loader = DataLoader(
             train_dataset,
             batch_size=self.config["training"]["batch_size"],
             shuffle=True,
-            num_workers=self.config.get("data", {}).get("num_workers", 0),
+            num_workers=self.config.get("data", {}).get("num_workers", num_workers),
             pin_memory=self.config.get("data", {}).get("pin_memory", True),
+            persistent_workers=True,
         )
         self.val_loader = DataLoader(
             val_dataset,
             batch_size=self.config["training"]["batch_size"],
             shuffle=False,
-            num_workers=self.config.get("data", {}).get("num_workers", 0),
-            pin_memory=self.config.get("data", {}).get("pin_memory", True),
+            num_workers=self.config.get("data", {}).get("num_workers", num_workers),
+            pin_memory=self.config.get("data", {}).get("pin_memory", True), 
+            persistent_workers=True,
         )
         print(f"Train loader setup with {len(train_dataset)} images.")
         print(f"Val loader setup with {len(val_dataset)} images.")
 
     def setup_optimizer_criterion(self) -> None:
-        self.criterion = nn.CrossEntropyLoss(weight=self.rebalancing_weights)
+        self.criterion = nn.CrossEntropyLoss()#(weight=self.rebalancing_weights)
         self.optimizer = optim.AdamW(
-            self.model.parameters(), lr=self.config["training"]["learning_rate"]
+            self.model.parameters(),
+            lr=self.config["training"]["learning_rate"],
+            weight_decay=self.config["training"].get("weight_decay", 10e-5),
         )
         print(
             "Optimizer (AdamW) and Criterion (CrossEntropyLoss with rebalancing) setup."
@@ -139,6 +145,7 @@ class ColorizationPipeline(BasePipeline):
         return avg_epoch_loss
 
     def evaluate(self, visualize: bool = False) -> float:
+        return 0.0
         self.model.eval()
         total_loss = 0.0
         num_batches = 0
@@ -236,7 +243,7 @@ class ColorizationPipeline(BasePipeline):
             }
             ckpt_name = f"{model_name}_epoch_{epoch:03d}_rebal.pth"
             ckpt_path = os.path.join(self.checkpoint_dir, ckpt_name)
-            torch.save(checkpoint, ckpt_path)
+            # torch.save(checkpoint, ckpt_path)
             if val_loss < best_val_loss:
                 best_val_loss = val_loss
                 best_model_path = os.path.join(

@@ -21,7 +21,7 @@ def generate_random_ab(hw):
 
 
 if __name__ == "__main__":
-    with open("src/configs/vit_config.yaml", "r") as file:
+    with open("src/configs/resnet_config.yaml", "r") as file:
         config = yaml.safe_load(file)
 
     device = (
