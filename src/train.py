@@ -3,11 +3,12 @@ import yaml
 
 # Adjust imports based on final structure
 from models.resnet import ResNetColorizationModel
+from models.vgg import VGGColorizationModel
 from models.vit import ViTColorizationModel
 from pipelines.colorization_pipeline import ColorizationPipeline
 
 if __name__ == "__main__":
-    with open("src/configs/resnet_config.yaml", "r") as file:
+    with open("src/configs/vgg_config.yaml", "r") as file:
         config = yaml.safe_load(file)
     device = (
         "mps"
@@ -30,6 +31,11 @@ if __name__ == "__main__":
         model_instance = ViTColorizationModel(
             pretrained=config["model"]["pretrained"],
         )
+    elif config["model"]["name"] == "vgg":
+        model_instance = VGGColorizationModel(
+            pretrained=config["model"]["pretrained"]
+        )
+        print("Using VGG model.")
     else:
         raise ValueError(f"Unknown model type: {config['model']['name']}")
     

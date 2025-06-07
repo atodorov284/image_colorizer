@@ -1,0 +1,36 @@
+data:
+  train_dir: ./data/train2017
+  val_dir: ./data/val2017
+  train_captions_dir: ./data/annotations/captions_train2017.json
+  val_captions_dir: ./data/annotations/captions_val2017.json
+  train_cache_path: ./data/train_filtered_vgg.json
+  val_cache_path: ./data/val_filtered_vgg.json
+  image_size:
+    - 224
+    - 224
+
+model:
+  name: vgg
+  pretrained: True
+
+training:
+  batch_size: 64 # VGG is more memory-intensive, a smaller batch size is a safe start
+  learning_rate: 0.001 # A lower learning rate is often better for fine-tuning VGG
+  num_epochs: 1000
+  patience: 1000
+  min_delta: 0.00001
+  subset_percent: 1.0
+  lr_scheduler:
+    step_size: 100
+    gamma: 0.5
+
+testing:
+  test_dir: ./data/test2017
+  subset_percent: 0.05
+  predicted_image_dir: ./test/colorised_images_vgg
+  visualisation: True
+  visualisation_dir: ./test/visualisations_vgg
+
+output:
+  checkpoint_dir: ./vgg/checkpoints
+  best_model_dir: ./vgg/best_model

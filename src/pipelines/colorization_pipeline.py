@@ -6,6 +6,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
+from torch.optim.lr_scheduler import StepLR
 from torch.utils.data import DataLoader, Subset
 from tqdm import tqdm
 
@@ -18,8 +19,11 @@ from utils.early_stopping import EarlyStopping
 class ColorizationPipeline(BasePipeline):
     def __init__(self, config: dict, model: nn.Module, device: torch.device) -> None:
         super().__init__(config, model, device)
+        self.num_workers = os.cpu_count() // (torch.cuda.device_count())
+        print(f"Number of workers: {self.num_workers}")
         self.ab_bins = ColorizationUtils.get_ab_bins().to(self.device)
         self.rebalancing_weights = None
+        self.scheduler = None
         self.setup_loaders()
         self.setup_optimizer_criterion()
         self.checkpoint_dir = self.config["output"]["checkpoint_dir"]
@@ -30,6 +34,7 @@ class ColorizationPipeline(BasePipeline):
             patience=self.config["training"]["patience"],
             min_delta=self.config["training"]["min_delta"],
         )
+        
 
     def setup_loaders(self) -> None:
         full_train_dataset_for_weights = ColorizationDataset(
@@ -43,7 +48,7 @@ class ColorizationPipeline(BasePipeline):
             full_train_dataset_for_weights,
             batch_size=self.config["training"]["batch_size"],
             shuffle=False,
-            num_workers=self.config.get("data", {}).get("num_workers", 0),
+            num_workers=self.num_workers,
         )
 
         lambda_rebal = self.config["training"].get("lambda_rebal", 0.5)
@@ -55,17 +60,15 @@ class ColorizationPipeline(BasePipeline):
         )
 
         if os.path.exists(weights_cache_path):
-            print(f"Loading rebalancing weights from cache: {weights_cache_path}")
             self.rebalancing_weights = torch.load(weights_cache_path).to(self.device)
         else:
             self.rebalancing_weights = ColorizationUtils.calculate_rebalancing_weights(
                 weights_dataloader, self.ab_bins, lambda_rebal, sigma_smooth_rebal
             ).to(self.device)
-            print(f"Saving rebalancing weights to cache: {weights_cache_path}")
             os.makedirs(os.path.dirname(weights_cache_path), exist_ok=True)
             torch.save(self.rebalancing_weights, weights_cache_path)
 
-        print("Rebalancing weights initialized.")
+
         train_dataset = ColorizationDataset(
             root_dir=self.config["data"]["train_dir"],
             captions_dir=self.config["data"]["train_captions_dir"],
@@ -86,9 +89,7 @@ class ColorizationPipeline(BasePipeline):
                 len(train_dataset), num_samples_train, replace=False
             )
             train_dataset = Subset(train_dataset, indices_train)
-            print(
-                f"Using {num_samples_train} samples ({subset_percent * 100:.1f}%) from the training dataset."
-            )
+
 
         num_workers = os.cpu_count() // (torch.cuda.device_count())
 
@@ -96,7 +97,7 @@ class ColorizationPipeline(BasePipeline):
             train_dataset,
             batch_size=self.config["training"]["batch_size"],
             shuffle=True,
-            num_workers=self.config.get("data", {}).get("num_workers", num_workers),
+            num_workers=self.num_workers,
             pin_memory=self.config.get("data", {}).get("pin_memory", True),
             persistent_workers=True,
         )
@@ -104,23 +105,28 @@ class ColorizationPipeline(BasePipeline):
             val_dataset,
             batch_size=self.config["training"]["batch_size"],
             shuffle=False,
-            num_workers=self.config.get("data", {}).get("num_workers", num_workers),
-            pin_memory=self.config.get("data", {}).get("pin_memory", True), 
+            num_workers=self.num_workers,
+            pin_memory=self.config.get("data", {}).get("pin_memory", True),
             persistent_workers=True,
         )
-        print(f"Train loader setup with {len(train_dataset)} images.")
-        print(f"Val loader setup with {len(val_dataset)} images.")
+
 
     def setup_optimizer_criterion(self) -> None:
-        self.criterion = nn.CrossEntropyLoss()# (weight=self.rebalancing_weights)
+        self.criterion = nn.CrossEntropyLoss()
         self.optimizer = optim.AdamW(
             self.model.parameters(),
             lr=self.config["training"]["learning_rate"],
             weight_decay=self.config["training"].get("weight_decay", 10e-5),
         )
-        print(
-            "Optimizer (AdamW) and Criterion (CrossEntropyLoss with rebalancing) setup."
-        )
+
+        if "lr_scheduler" in self.config["training"]:
+            scheduler_config = self.config["training"]["lr_scheduler"]
+            self.scheduler = StepLR(
+                self.optimizer,
+                step_size=scheduler_config["step_size"],
+                gamma=scheduler_config["gamma"],
+            )
+
 
     def train_epoch(self, epoch_num: int) -> float:
         self.model.train()
@@ -141,7 +147,6 @@ class ColorizationPipeline(BasePipeline):
             num_batches += 1
             progress_bar.set_postfix(loss=loss.item())
         avg_epoch_loss = epoch_loss / num_batches if num_batches > 0 else 0.0
-        print(f"Epoch {epoch_num} Average Loss: {avg_epoch_loss:.6f}")
         return avg_epoch_loss
 
     def evaluate(self, visualize: bool = False) -> float:
@@ -171,7 +176,6 @@ class ColorizationPipeline(BasePipeline):
                     visualization_done = True
 
         avg_loss = total_loss / num_batches if num_batches > 0 else 0.0
-        print(f"Validation Average Loss: {avg_loss:.6f}")
         return avg_loss
 
     def visualize_batch(self, lll_inputs, ab_targets_continuous, predicted_logits):
@@ -196,15 +200,12 @@ class ColorizationPipeline(BasePipeline):
 
             fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(15, 5))
             ax1.imshow(original_l_image_input.permute(1, 2, 0)[:, :, 0], cmap="gray")
-            ax1.set_title("Original L")
             ax1.axis("off")
 
             ax2.imshow(ground_truth_color_image)
-            ax2.set_title("Ground Truth Color")
             ax2.axis("off")
 
             ax3.imshow(predicted_color_image)
-            ax3.set_title("Predicted Color")
             ax3.axis("off")
 
             plt.show()
@@ -215,7 +216,6 @@ class ColorizationPipeline(BasePipeline):
         visualization_epoch_interval = self.config["training"].get(
             "visualization_epoch_interval", 50
         )
-        print(f"Starting training for {num_epochs} epochs...")
         start_time = datetime.now()
         best_val_loss = float("inf")
         for epoch in range(1, num_epochs + 1):
@@ -226,9 +226,11 @@ class ColorizationPipeline(BasePipeline):
                 or epoch == num_epochs
             )
             val_loss = self.evaluate(visualize=should_visualize)
-            print(
-                f"Epoch {epoch}/{num_epochs} - Train Loss: {train_loss:.6f}, Val Loss: {val_loss:.6f}"
-            )
+
+            if self.scheduler:
+                self.scheduler.step()
+
+
             end_time = datetime.now()
             checkpoint = {
                 "epoch": epoch,
@@ -242,31 +244,25 @@ class ColorizationPipeline(BasePipeline):
             }
             ckpt_name = f"{model_name}_epoch_{epoch:03d}_rebal.pth"
             ckpt_path = os.path.join(self.checkpoint_dir, ckpt_name)
-            # torch.save(checkpoint, ckpt_path)
+
             if val_loss < best_val_loss:
                 best_val_loss = val_loss
                 best_model_path = os.path.join(
                     self.best_model_dir, "best_model_rebal.pth"
                 )
                 torch.save(self.model.state_dict(), best_model_path)
-                print(
-                    f"New best model saved to {best_model_path} (Val Loss: {best_val_loss:.6f})"
-                )
+
             if self.early_stopping(val_loss, self.model):
-                print(
-                    f"Early stopping triggered at epoch {epoch}. Restoring best model weights if criterion met."
-                )
+
                 if self.early_stopping.best_state:
                     self.model.load_state_dict(self.early_stopping.best_state)
                     best_early_stop_model_path = os.path.join(
                         self.best_model_dir, "best_model_earlystop_rebal.pth"
                     )
                     torch.save(self.model.state_dict(), best_early_stop_model_path)
-                    print(
-                        f"Best model from early stopping saved to {best_early_stop_model_path}."
-                    )
+
                 break
-        print("Training finished.")
+
 
     @torch.no_grad()
     def predict(self, lll_input_tensor: torch.Tensor) -> torch.Tensor:
