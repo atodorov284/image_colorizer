@@ -8,64 +8,138 @@ NUM_AB_BINS = 313
 
 
 class VGGColorizationModel(BaseColorizationModel):
-    def __init__(self, pretrained: bool = True) -> None:
+    def __init__(self, pretrained: bool = True):
         super().__init__()
-        weights = VGG16_Weights.DEFAULT if pretrained else None
+        self.l_cent = 50.0
+        self.l_norm = 100.0
+        self.ab_norm = 110.0
+        norm_layer = nn.BatchNorm2d
 
-        # Load the VGG16 model and select its feature extractor part
-        vgg = vgg16(weights=weights)
-        self.features = vgg.features
+        model1 = [
+            nn.Conv2d(1, 64, kernel_size=3, stride=1, padding=1, bias=True),
+            nn.ReLU(True),
+            nn.Conv2d(64, 64, kernel_size=3, stride=2, padding=1, bias=True),
+            nn.ReLU(True),
+            norm_layer(64),
+        ]
 
-        # Decoder to upsample and predict color bins
-        self.upsample_predict = nn.Sequential(
-            # Input to the decoder will be the output of the VGG features (512 channels)
-            nn.Conv2d(512, 512, kernel_size=3, padding=1),
-            nn.ReLU(inplace=True),
-            nn.Upsample(scale_factor=2, mode="bilinear", align_corners=False),
+        model2 = [
+            nn.Conv2d(64, 128, kernel_size=3, stride=1, padding=1, bias=True),
+            nn.ReLU(True),
+            nn.Conv2d(128, 128, kernel_size=3, stride=2, padding=1, bias=True),
+            nn.ReLU(True),
+            norm_layer(128),
+        ]
 
-            nn.Conv2d(512, 256, kernel_size=3, padding=1),
-            nn.ReLU(inplace=True),
-            nn.Conv2d(256, 256, kernel_size=3, padding=1),
-            nn.ReLU(inplace=True),
-            nn.Upsample(scale_factor=2, mode="bilinear", align_corners=False),
+        model3 = [
+            nn.Conv2d(128, 256, kernel_size=3, stride=1, padding=1, bias=True),
+            nn.ReLU(True),
+            nn.Conv2d(256, 256, kernel_size=3, stride=1, padding=1, bias=True),
+            nn.ReLU(True),
+            nn.Conv2d(256, 256, kernel_size=3, stride=2, padding=1, bias=True),
+            nn.ReLU(True),
+            norm_layer(256),
+        ]
 
-            nn.Conv2d(256, 128, kernel_size=3, padding=1),
-            nn.ReLU(inplace=True),
-            nn.Conv2d(128, 128, kernel_size=3, padding=1),
-            nn.ReLU(inplace=True),
-            nn.Upsample(scale_factor=2, mode="bilinear", align_corners=False),
+        model4 = [
+            nn.Conv2d(256, 512, kernel_size=3, stride=1, padding=1, bias=True),
+            nn.ReLU(True),
+            nn.Conv2d(512, 512, kernel_size=3, stride=1, padding=1, bias=True),
+            nn.ReLU(True),
+            nn.Conv2d(512, 512, kernel_size=3, stride=1, padding=1, bias=True),
+            nn.ReLU(True),
+            norm_layer(512),
+        ]
 
-            nn.Conv2d(128, 64, kernel_size=3, padding=1),
-            nn.ReLU(inplace=True),
-            nn.Conv2d(64, 64, kernel_size=3, padding=1),
-            nn.ReLU(inplace=True),
-            nn.Upsample(scale_factor=2, mode="bilinear", align_corners=False),
+        model5 = [
+            nn.Conv2d(
+                512, 512, kernel_size=3, dilation=2, stride=1, padding=2, bias=True
+            ),
+            nn.ReLU(True),
+            nn.Conv2d(
+                512, 512, kernel_size=3, dilation=2, stride=1, padding=2, bias=True
+            ),
+            nn.ReLU(True),
+            nn.Conv2d(
+                512, 512, kernel_size=3, dilation=2, stride=1, padding=2, bias=True
+            ),
+            nn.ReLU(True),
+            norm_layer(512),
+        ]
 
-            nn.Conv2d(64, 32, kernel_size=3, padding=1),
-            nn.ReLU(inplace=True),
-            nn.Conv2d(32, 32, kernel_size=3, padding=1),
-            nn.ReLU(inplace=True),
-            nn.Upsample(scale_factor=2, mode="bilinear", align_corners=False),
+        model6 = [
+            nn.Conv2d(
+                512, 512, kernel_size=3, dilation=2, stride=1, padding=2, bias=True
+            ),
+            nn.ReLU(True),
+            nn.Conv2d(
+                512, 512, kernel_size=3, dilation=2, stride=1, padding=2, bias=True
+            ),
+            nn.ReLU(True),
+            nn.Conv2d(
+                512, 512, kernel_size=3, dilation=2, stride=1, padding=2, bias=True
+            ),
+            nn.ReLU(True),
+            norm_layer(512),
+        ]
 
-            # Final convolution to get the 313 color bins
-            nn.Conv2d(32, NUM_AB_BINS, kernel_size=3, padding=1),
+        model7 = [
+            nn.Conv2d(512, 512, kernel_size=3, stride=1, padding=1, bias=True),
+            nn.ReLU(True),
+            nn.Conv2d(512, 512, kernel_size=3, stride=1, padding=1, bias=True),
+            nn.ReLU(True),
+            nn.Conv2d(512, 512, kernel_size=3, stride=1, padding=1, bias=True),
+            nn.ReLU(True),
+            norm_layer(512),
+        ]
+
+        model8 = [
+            nn.ConvTranspose2d(512, 256, kernel_size=4, stride=2, padding=1, bias=True),
+            nn.ReLU(True),
+            nn.Conv2d(256, 256, kernel_size=3, stride=1, padding=1, bias=True),
+            nn.ReLU(True),
+            nn.Conv2d(256, 256, kernel_size=3, stride=1, padding=1, bias=True),
+            nn.ReLU(True),
+            nn.Conv2d(256, 313, kernel_size=1, stride=1, padding=0, bias=True),
+        ]
+
+        self.model1 = nn.Sequential(*model1)
+        self.model2 = nn.Sequential(*model2)
+        self.model3 = nn.Sequential(*model3)
+        self.model4 = nn.Sequential(*model4)
+        self.model5 = nn.Sequential(*model5)
+        self.model6 = nn.Sequential(*model6)
+        self.model7 = nn.Sequential(*model7)
+        self.model8 = nn.Sequential(*model8)
+
+        self.softmax = nn.Softmax(dim=1)
+        self.model_out = nn.Conv2d(
+            313, 2, kernel_size=1, padding=0, dilation=1, stride=1, bias=False
         )
+        self.upsample4 = nn.Upsample(scale_factor=4, mode="bilinear")
 
-    def forward(self, x_l: torch.Tensor) -> torch.Tensor:
-        """
-        Forward pass for the VGG-based colorization model.
+    def forward(self, input_l):
+        input_l = input_l[:, :1, :, :]
+        conv1_2 = self.model1(self.normalize_l(input_l))
+        conv2_2 = self.model2(conv1_2)
+        conv3_3 = self.model3(conv2_2)
+        conv4_3 = self.model4(conv3_3)
+        conv5_3 = self.model5(conv4_3)
+        conv6_3 = self.model6(conv5_3)
+        conv7_3 = self.model7(conv6_3)
+        conv8_3 = self.model8(conv7_3)
+        out_reg = self.model_out(self.softmax(conv8_3))
 
-        Args:
-            x_l (torch.Tensor): Input LLL tensor. Shape: [Batch, 3, H, W].
-                                The VGG model expects a 3-channel input.
+        return self.unnormalize_ab(self.upsample4(out_reg))
 
-        Returns:
-            torch.Tensor: Predicted AB channel logits. Shape: [Batch, 313, H, W].
-        """
-        # Pass input through the VGG feature extractor
-        features = self.features(x_l)
+    def normalize_l(self, in_l):
+        return (in_l - self.l_cent) / self.l_norm
 
-        # Pass features through the decoder to get color bin predictions
-        ab_logits = self.upsample_predict(features)
-        return ab_logits
+    def unnormalize_l(self, in_l):
+        return in_l * self.l_norm + self.l_cent
 
+    def normalize_ab(self, in_ab):
+        return in_ab / self.ab_norm
+
+    def unnormalize_ab(self, in_ab):
+        return in_ab * self.ab_norm

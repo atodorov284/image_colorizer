@@ -19,7 +19,10 @@ from utils.early_stopping import EarlyStopping
 class ColorizationPipeline(BasePipeline):
     def __init__(self, config: dict, model: nn.Module, device: torch.device) -> None:
         super().__init__(config, model, device)
-        self.num_workers = os.cpu_count() // (torch.cuda.device_count())
+        if torch.cuda.is_available():
+            self.num_workers = os.cpu_count() // (torch.cuda.device_count())
+        else:
+            self.num_workers = os.cpu_count()
         print(f"Number of workers: {self.num_workers}")
         self.ab_bins = ColorizationUtils.get_ab_bins().to(self.device)
         self.rebalancing_weights = None
@@ -34,7 +37,6 @@ class ColorizationPipeline(BasePipeline):
             patience=self.config["training"]["patience"],
             min_delta=self.config["training"]["min_delta"],
         )
-        
 
     def setup_loaders(self) -> None:
         full_train_dataset_for_weights = ColorizationDataset(
@@ -68,7 +70,6 @@ class ColorizationPipeline(BasePipeline):
             os.makedirs(os.path.dirname(weights_cache_path), exist_ok=True)
             torch.save(self.rebalancing_weights, weights_cache_path)
 
-
         train_dataset = ColorizationDataset(
             root_dir=self.config["data"]["train_dir"],
             captions_dir=self.config["data"]["train_captions_dir"],
@@ -90,7 +91,6 @@ class ColorizationPipeline(BasePipeline):
             )
             train_dataset = Subset(train_dataset, indices_train)
 
-
         num_workers = os.cpu_count() // (torch.cuda.device_count())
 
         self.train_loader = DataLoader(
@@ -110,7 +110,6 @@ class ColorizationPipeline(BasePipeline):
             persistent_workers=True,
         )
 
-
     def setup_optimizer_criterion(self) -> None:
         self.criterion = nn.CrossEntropyLoss()
         self.optimizer = optim.AdamW(
@@ -126,7 +125,6 @@ class ColorizationPipeline(BasePipeline):
                 step_size=scheduler_config["step_size"],
                 gamma=scheduler_config["gamma"],
             )
-
 
     def train_epoch(self, epoch_num: int) -> float:
         self.model.train()
@@ -230,7 +228,6 @@ class ColorizationPipeline(BasePipeline):
             if self.scheduler:
                 self.scheduler.step()
 
-
             end_time = datetime.now()
             checkpoint = {
                 "epoch": epoch,
@@ -253,7 +250,6 @@ class ColorizationPipeline(BasePipeline):
                 torch.save(self.model.state_dict(), best_model_path)
 
             if self.early_stopping(val_loss, self.model):
-
                 if self.early_stopping.best_state:
                     self.model.load_state_dict(self.early_stopping.best_state)
                     best_early_stop_model_path = os.path.join(
@@ -262,7 +258,6 @@ class ColorizationPipeline(BasePipeline):
                     torch.save(self.model.state_dict(), best_early_stop_model_path)
 
                 break
-
 
     @torch.no_grad()
     def predict(self, lll_input_tensor: torch.Tensor) -> torch.Tensor:

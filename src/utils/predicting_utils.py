@@ -1,8 +1,8 @@
-import torch
-from typing import List
 import os
-from PIL import Image
+from typing import List
 
+import torch
+from PIL import Image
 from skimage.color import lab2rgb
 
 
@@ -57,7 +57,9 @@ class PredictingUtils:
         elif os.path.isfile(test_dir):
             return [test_dir]
         else:
-            raise FileNotFoundError(f"Invalid test_dir: {test_dir}. It should be a file or a directory.")
+            raise FileNotFoundError(
+                f"Invalid test_dir: {test_dir}. It should be a file or a directory."
+            )
         if subset_percent < 1.0:
-            img_paths = img_paths[:int(len(img_paths) * subset_percent)]
+            img_paths = img_paths[: int(len(img_paths) * subset_percent)]
         return img_paths
