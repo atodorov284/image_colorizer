@@ -83,7 +83,7 @@ if __name__ == "__main__":
 
     for img in tqdm(img_paths, desc="Predicting"):
         pil_in = np.array(Image.open(img).convert("RGB"))
-        out_img_eccv16 = PredictingUtils.predict(model, device, pil_in)
+        out_img = PredictingUtils.predict(model, device, pil_in)
 
-        plt.imshow(out_img_eccv16)
+        plt.imshow(out_img)
         plt.show()

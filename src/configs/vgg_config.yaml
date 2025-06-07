@@ -24,9 +24,9 @@ training:
   lambda_rebal: 0.5
   sigma_smooth_rebal: 5.0
   lr_scheduler:
-    step_size: 100
+    step_size: 10
     gamma: 0.5
-  visualization_epoch_interval: 50
+  visualization_epoch_interval: 5
 
 testing:
   test_dir: ./custom_tests
