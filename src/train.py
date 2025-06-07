@@ -19,7 +19,6 @@ if __name__ == "__main__":
     )
 
     print(f"Using device: {device}")
-
     if config["model"]["name"] == "resnet":
         model_instance = ResNetColorizationModel(
             pretrained=config["model"]["pretrained"]

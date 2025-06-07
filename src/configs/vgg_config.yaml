@@ -14,15 +14,19 @@ model:
   pretrained: True
 
 training:
-  batch_size: 64 # VGG is more memory-intensive, a smaller batch size is a safe start
-  learning_rate: 0.001 # A lower learning rate is often better for fine-tuning VGG
+  batch_size: 1
+  learning_rate: 0.001
   num_epochs: 1000
   patience: 1000
   min_delta: 0.00001
-  subset_percent: 1.0
+  subset_percent: 0.0001
+  weight_decay: 0.0001
+  lambda_rebal: 0.5
+  sigma_smooth_rebal: 5.0
   lr_scheduler:
     step_size: 100
     gamma: 0.5
+  visualization_epoch_interval: 50
 
 testing:
   test_dir: ./data/test2017
@@ -30,6 +34,7 @@ testing:
   predicted_image_dir: ./test/colorised_images_vgg
   visualisation: True
   visualisation_dir: ./test/visualisations_vgg
+  annealed_mean_temp: 0.38
 
 output:
   checkpoint_dir: ./vgg/checkpoints
