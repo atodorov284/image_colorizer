@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from torchvision.models import ResNet18_Weights, resnet18
+from torchvision.models import ResNet34_Weights, resnet34
 
 from models.base_model import BaseColorizationModel
 
@@ -10,11 +10,12 @@ NUM_AB_BINS = 313
 class ResNetColorizationModel(BaseColorizationModel):
     def __init__(self, pretrained: bool = True) -> None:
         super().__init__()
-        weights = ResNet18_Weights.DEFAULT if pretrained else None
-        resnet = resnet18(weights=weights)
+        weights = ResNet34_Weights.DEFAULT if pretrained else None
+        resnet = resnet34(weights=weights)
         self.features = nn.Sequential(*list(resnet.children())[:-2])
 
         self.upsample_predict = nn.Sequential(
+            # The output of the full ResNet-18/34 is 512 channels
             nn.Conv2d(512, 256, kernel_size=3, padding=1),
             nn.ReLU(inplace=True),
             nn.Conv2d(256, 256, kernel_size=3, padding=1),

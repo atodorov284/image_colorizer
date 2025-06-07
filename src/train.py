@@ -37,6 +37,7 @@ if __name__ == "__main__":
         print(f"Using {torch.cuda.device_count()} GPUs")
         model_instance = torch.nn.DataParallel(model_instance, device_ids=list(range(torch.cuda.device_count())))
     
+    print(model_instance)
 
     pipeline = ColorizationPipeline(config, model_instance, device)
 

@@ -112,7 +112,7 @@ class ColorizationPipeline(BasePipeline):
         print(f"Val loader setup with {len(val_dataset)} images.")
 
     def setup_optimizer_criterion(self) -> None:
-        self.criterion = nn.CrossEntropyLoss()#(weight=self.rebalancing_weights)
+        self.criterion = nn.CrossEntropyLoss()# (weight=self.rebalancing_weights)
         self.optimizer = optim.AdamW(
             self.model.parameters(),
             lr=self.config["training"]["learning_rate"],
@@ -145,7 +145,6 @@ class ColorizationPipeline(BasePipeline):
         return avg_epoch_loss
 
     def evaluate(self, visualize: bool = False) -> float:
-        return 0.0
         self.model.eval()
         total_loss = 0.0
         num_batches = 0
