@@ -8,10 +8,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 interface GalleryImage {
   id: string;
-  originalUrl: string;
-  colorizedUrl: string;
+  image_o  : string;
+  image_c: string;
   uploadDate: Date;
-  modelUsed: 'HistoColor Pro' | 'Landscape AI' | 'TurboColor';
+  modelUsed: 'ResNet18' | 'VGG16' | 'VGG16 (Quantized)';
   fileName: string;
 }
 
@@ -24,36 +24,76 @@ interface GalleryProps {
 const initialMockImages: GalleryImage[] = [
   {
     id: '1',
-    originalUrl: 'https://picsum.photos/seed/chroma_img1_orig/800/800',
-    colorizedUrl: 'https://picsum.photos/seed/chroma_img1_color/800/800',
+    image_o: '/image_ex1_o.jpeg',
+    image_c: '/image_ex1_o.jpeg',
     uploadDate: new Date(2023, 0, 15),
-    modelUsed: 'HistoColor Pro',
+    modelUsed: 'ResNet18',
     fileName: 'vintage-portrait.jpg'
   },
   {
     id: '2',
-    originalUrl: 'https://picsum.photos/seed/chroma_img2_orig/800/800',
-    colorizedUrl: 'https://picsum.photos/seed/chroma_img2_color/800/800',
+    image_o: '/image_ex2_o.jpeg',
+    image_c: '/image_ex2_o.jpeg',
     uploadDate: new Date(2023, 1, 20),
-    modelUsed: 'Landscape AI',
+    modelUsed: 'VGG16',
     fileName: 'mountain-scene.png'
   },
   {
     id: '3',
-    originalUrl: 'https://picsum.photos/seed/chroma_img3_orig/800/800',
-    colorizedUrl: 'https://picsum.photos/seed/chroma_img3_color/800/800',
+    image_o: '/image_ex3_o.jpeg',
+    image_c: '/image_ex3_o.jpeg',
     uploadDate: new Date(2023, 2, 10),
-    modelUsed: 'TurboColor',
+    modelUsed: 'VGG16 (Quantized)',
     fileName: 'quick-shot.jpeg'
   },
   {
     id: '4',
-    originalUrl: 'https://picsum.photos/seed/chroma_img4_orig/800/800',
-    colorizedUrl: 'https://picsum.photos/seed/chroma_img4_color/800/800',
+    image_o: '/image_ex4_o.jpeg',
+    image_c: '/image_ex4_o.jpeg',
     uploadDate: new Date(2023, 3, 5),
-    modelUsed: 'HistoColor Pro',
+    modelUsed: 'ResNet18',
     fileName: 'building-facade.jpg'
-  }
+  },
+  {
+    id: '5',
+    image_o: '/image_ex5_o.jpeg',
+    image_c: '/image_ex5_o.jpeg',
+    uploadDate: new Date(2023, 4, 12),
+    modelUsed: 'VGG16',
+    fileName: 'forest-path.png'
+  },
+  {
+    id: '6',
+    image_o: '/image_ex6_o.jpeg',
+    image_c: '/image_ex6_o.jpeg',
+    uploadDate: new Date(2023, 5, 18),
+    modelUsed: 'VGG16 (Quantized)',
+    fileName: 'cityscape.jpeg'
+  },
+  {
+    id: '7',
+    image_o: '/image_ex7_o.jpeg',
+    image_c: '/image_ex7_o.jpeg',
+    uploadDate: new Date(2023, 6, 22),
+    modelUsed: 'ResNet18',
+    fileName: 'beach-sunset.jpg'
+  },
+  {
+    id: '8',
+    image_o: '/image_ex8_o.jpeg',
+    image_c: '/image_ex8_o.jpeg',
+    uploadDate: new Date(2023, 7, 30),
+    modelUsed: 'VGG16',
+    fileName: 'desert-dunes.png'
+  },
+  {
+    id: '9',
+    image_o: '/image_ex9_o.jpeg',
+    image_c: '/image_ex9_o.jpeg',
+    uploadDate: new Date(2023, 8, 15),
+    modelUsed: 'VGG16 (Quantized)',
+    fileName: 'night-sky.jpeg'
+  }     
 ];
 
 const formatDate = (date: Date) => {
@@ -87,28 +127,6 @@ const Gallery: React.FC<GalleryProps> = ({
     return img.modelUsed === filter;
   });
 
-  const handleDownload = (imageToDownload: GalleryImage, isOriginalVersion: boolean) => {
-    const urlToDownload = isOriginalVersion ? imageToDownload.originalUrl : imageToDownload.colorizedUrl;
-    const originalFileName = imageToDownload.fileName || 'downloaded_image';
-    const nameParts = originalFileName.split('.');
-    const baseName = nameParts.slice(0, -1).join('.') || originalFileName;
-    const extension = nameParts.length > 1 ? nameParts.pop() : 'jpg';
-    
-    const fileName = `${baseName}_${isOriginalVersion ? 'original' : 'colorized'}.${extension}`;
-    
-    console.log('Attempting to download:', fileName, 'from URL:', urlToDownload);
-
-    const link = document.createElement('a');
-    link.href = urlToDownload;
-    link.download = fileName;
-    // For cross-origin URLs, target="_blank" can sometimes help initiate the download
-    // or at least open the image in a new tab for the user to save.
-    link.target = '_blank'; 
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
   const openViewImageModal = (image: GalleryImage) => {
     setSelectedImage(image);
     setShowOriginalInViewModal(false); // Default to colorized in view modal
@@ -124,7 +142,7 @@ const Gallery: React.FC<GalleryProps> = ({
     if (!selectedImage) return;
     // In a real app, you'd likely have a dedicated shareable page URL for the image
     // For now, we'll use the colorized image URL itself.
-    const shareUrl = selectedImage.colorizedUrl; 
+    const shareUrl = selectedImage.image_c; 
     navigator.clipboard.writeText(shareUrl).then(() => {
       setCopiedLink(true);
       setTimeout(() => setCopiedLink(false), 2000);
@@ -147,13 +165,13 @@ const Gallery: React.FC<GalleryProps> = ({
     }
   };
 
-  const getModelIcon = (model: string) => { /* ... (no change) ... */ return model === 'HistoColor Pro' ? 'fa-crown' : model === 'Landscape AI' ? 'fa-mountain' : model === 'TurboColor' ? 'fa-bolt' : 'fa-palette'; };
-  const getModelColor = (model: string) => { /* ... (no change) ... */ return model === 'HistoColor Pro' ? 'from-pink-500 to-rose-500' : model === 'Landscape AI' ? 'from-green-400 to-teal-500' : model === 'TurboColor' ? 'from-purple-500 to-indigo-600' : 'from-gray-400 to-gray-600'; };
+  const getModelIcon = (model: string) => { /* ... (no change) ... */ return model === 'ResNet18' ? 'fas fa-cogs' : model === 'VGG16' ? 'fas fa-brain' : model === 'VGG16 (Quantized)' ? 'fas fa-bolt' : 'fa-palette'; };
+  const getModelColor = (model: string) => { /* ... (no change) ... */ return model === 'VGG16' ? 'from-pink-500 to-rose-500' : model === 'ResNet18' ? 'from-green-400 to-teal-500' : model === 'VGG16 (Quantized)' ? 'from-purple-500 to-indigo-600' : 'from-gray-400 to-gray-600'; };
   
   const shareOnSocial = (platform: 'facebook' | 'twitter' | 'whatsapp' | 'instagram') => { /* ... (implementation from previous step, ensuring selectedImage is checked) ... */ 
     if (!selectedImage) return;
     const pageUrl = window.location.href; // Share the gallery page URL as an example
-    const imageUrlForDirectShare = selectedImage.colorizedUrl; // Actual image URL
+    const imageUrlForDirectShare = selectedImage.image_c; // Actual image URL
     const shareText = encodeURIComponent(`Check out this image I colorized with ChromaFlow: ${selectedImage.fileName}`);
     let url = '';
 
@@ -224,7 +242,7 @@ const Gallery: React.FC<GalleryProps> = ({
           <div className="flex justify-center mb-10">
             {/* ... (Filter buttons JSX, no changes needed here) ... */}
             <div className="bg-gray-800 bg-opacity-70 rounded-full p-1 flex space-x-1 sm:space-x-2">
-              {['all', 'HistoColor Pro', 'Landscape AI', 'TurboColor'].map(modelFilter => (
+              {['all', 'ResNet18', 'VGG16', 'VGG16 (Quantized)'].map(modelFilter => (
                 <button
                   key={modelFilter}
                   onClick={() => setFilter(modelFilter)}
@@ -254,7 +272,7 @@ const Gallery: React.FC<GalleryProps> = ({
                 >
                   <div className="relative aspect-square overflow-hidden bg-gray-700 cursor-pointer" onClick={() => openViewImageModal(image)}>
                     <Image 
-                      src={image.colorizedUrl}
+                      src={image.image_c}
                       alt={image.fileName} 
                       fill 
                       className="object-cover transition-transform duration-300 group-hover:scale-105"
@@ -332,7 +350,7 @@ const Gallery: React.FC<GalleryProps> = ({
                 </div>
                 <div className="aspect-square relative rounded-lg overflow-hidden mb-4 bg-gray-700">
                   <Image 
-                    src={showOriginalInViewModal ? selectedImage.originalUrl : selectedImage.colorizedUrl} 
+                    src={showOriginalInViewModal ? selectedImage.image_o : selectedImage.image_c} 
                     alt={selectedImage.fileName} 
                     fill
                     className="object-contain"
@@ -381,7 +399,7 @@ const Gallery: React.FC<GalleryProps> = ({
                 
                 <div className="mb-4">
                   <div className="aspect-video relative rounded-lg overflow-hidden mb-2 bg-gray-700"> {/* Share modal usually shows colorized */}
-                    <Image src={selectedImage.colorizedUrl} alt={selectedImage.fileName} fill className="object-cover" sizes="(max-width: 768px) 100vw, 50vw" />
+                    <Image src={selectedImage.image_c} alt={selectedImage.fileName} fill className="object-cover" sizes="(max-width: 768px) 100vw, 50vw" />
                   </div>
                 </div>
                 <p className="text-sm text-gray-300 mb-1 text-center font-medium">{selectedImage.fileName}</p>
