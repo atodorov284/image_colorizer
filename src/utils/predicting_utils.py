@@ -20,7 +20,10 @@ class PredictingUtils:
     @staticmethod
     @torch.no_grad()
     def predict_vgg(
-        model: torch.nn.Module, device: torch.device, input_image: Image.Image
+        model: torch.nn.Module,
+        device: torch.device,
+        input_image: Image.Image,
+        input_size: Tuple[int, int],
     ) -> np.ndarray:
         """
         Predict the ab channels for a given input image using the provided model.
@@ -32,7 +35,7 @@ class PredictingUtils:
             np.ndarray: Colorized RGB image as a numpy array in [0, 1].
         """
         l_orig_tensor, l_resized_tensor = PredictingUtils.preprocess_img(
-            input_image, target_hw=(256, 256)
+            input_image, target_hw=input_size
         )
         l_resized_tensor = l_resized_tensor.to(device)
         ab_predicted = model(l_resized_tensor).cpu()
@@ -41,7 +44,9 @@ class PredictingUtils:
 
     @staticmethod
     @torch.no_grad()
-    def predict_resnet(model, device, input_image: Image.Image) -> np.ndarray:
+    def predict_resnet(
+        model, device, input_image: Image.Image, input_size: Tuple[int, int]
+    ) -> np.ndarray:
         """
         Predicts AB channels for a single LLL input tensor.
 
@@ -56,7 +61,7 @@ class PredictingUtils:
             The colorized image
         """
         model.eval()
-        lll, _ = ColorizationUtils.preprocess_image(input_image, (256, 256))
+        lll, _ = ColorizationUtils.preprocess_image(input_image, input_size)
         input_batch = lll.unsqueeze(0).to(device)
         predicted_ab = model(input_batch).squeeze(0).cpu()
 

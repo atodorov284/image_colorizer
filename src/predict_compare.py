@@ -69,9 +69,13 @@ class ModelComparison:
         model = self.models[model_name]
 
         if model_name.lower() == "vgg":
-            return PredictingUtils.predict_vgg(model, self.device, input_image)
+            return PredictingUtils.predict_vgg(
+                model, self.device, input_image, input_size=target_size
+            )
         elif model_name.lower() == "resnet":
-            return PredictingUtils.predict_resnet(model, self.device, input_image)
+            return PredictingUtils.predict_resnet(
+                model, self.device, input_image, input_size=target_size
+            )
         else:
             print(f"Unknown model type: {model_name}")
             return None
