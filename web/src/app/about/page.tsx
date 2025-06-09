@@ -15,7 +15,7 @@ const AboutPage: React.FC = () => {
     {
       name: 'Mika Umaña',
       image: '/Mika.jpeg',
-      bio: 'AI Beachelor student at the University of Groningen and co-founder of ChromaFlow.',
+      bio: 'AI student at the University of Groningen and co-founder of ChromaFlow.',
       socials: { linkedin: 'https://www.linkedin.com/in/mika-umaña-lemus-76a485260', github: 'https://github.com/MikaMann' }
     },
     {
@@ -27,7 +27,7 @@ const AboutPage: React.FC = () => {
     {
       name: 'Christian Kobriger',
       image: '/Chirs.jpeg',
-      bio: 'Award-winning UX designer specializing in AI-powered creative tools.',
+      bio: 'Artificial Intelligence Student at the University of Groingen and co-founder of ChromaFlow.',
       socials: { linkedin: 'www.linkedin.com/in/christian-kobriger-171621192', github: 'https://github.com/03chrisk'}
     }
   ];
@@ -59,14 +59,14 @@ const AboutPage: React.FC = () => {
     }
   ];
 
-  const techStack = [
-    { name: 'TensorFlow', category: 'ML Framework', icon: '🧠', color: 'bg-gradient-to-br from-orange-500 to-red-500' },
-    { name: 'PyTorch', category: 'Deep Learning', icon: '🔥', color: 'bg-gradient-to-br from-red-500 to-pink-500' },
-    { name: 'Next.js', category: 'Frontend', icon: '⚛️', color: 'bg-gradient-to-br from-gray-700 to-gray-900' },
-    { name: 'Python', category: 'Backend', icon: '🐍', color: 'bg-gradient-to-br from-yellow-500 to-green-500' },
-    { name: 'Kubernetes', category: 'Orchestration', icon: '☸️', color: 'bg-gradient-to-br from-blue-500 to-purple-500' },
-    { name: 'Redis', category: 'Caching', icon: '💾', color: 'bg-gradient-to-br from-red-600 to-red-800' }
-  ];
+const techStack = [
+  { name: 'React', category: 'Frontend Framework', icon: '⚛️', color: 'bg-gradient-to-br from-blue-400 to-yellow-600' },
+  { name: 'PyTorch', category: 'ML Framework', icon: '🔥', color: 'bg-gradient-to-br from-white-500 to-red-500' },
+  { name: 'Next.js', category: 'Full-stack Framework', icon: '▲', color: 'bg-gradient-to-br from-gray-700 to-gray-900' },
+  { name: 'Tailwind', category: 'CSS Framework', icon: '🎨', color: 'bg-gradient-to-br from-green-400 to-blue-500' },
+  { name: 'Docker', category: 'Containerization', icon: '🐳', color: 'bg-gradient-to-br from-blue-500 to-cyan-700' },
+  { name: 'TypeScript', category: 'Programming Language', icon: '📘', color: 'bg-gradient-to-br from-orange-600 to-blue-800' }
+];
 
   const faqs = [
     {
@@ -207,26 +207,6 @@ const AboutPage: React.FC = () => {
           </div>
         </section>
 
-        {/* Our Values Section */}
-        <section id="values" className="py-16 md:py-24">
-            <div className="container mx-auto px-4">
-              <h2 className="text-5xl font-bold mb-20 text-center">
-                Our Core <span className="gradient-text">Values</span>
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-7xl mx-auto">
-                {values.map((value, index) => (
-                  <div key={value.title} className="glass-card p-8 rounded-3xl hover-glow transition-all duration-500 transform hover:-translate-y-2 text-center group">
-                    <div className={`bg-gradient-to-r ${value.color} w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg group-hover:scale-110 transition-transform duration-300`}>
-                      <i className={`${value.icon} text-white text-3xl`}></i>
-                    </div>
-                    <h3 className="text-2xl font-bold mb-4">{value.title}</h3>
-                    <p className="text-gray-300 leading-relaxed">{value.description}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </section>
-
         {/* Tech Stack Section */}
         <section className="py-20 md:py-32">
             <div className="container mx-auto px-4">
@@ -247,23 +227,6 @@ const AboutPage: React.FC = () => {
             </div>
         </section>
 
-        {/* FAQ Section */}
-        <section id="faq" className="py-16 md:py-24">
-            <div className="container mx-auto px-4">
-              <h2 className="text-5xl font-bold mb-20 text-center">
-                Frequently Asked <span className="gradient-text">Questions</span>
-              </h2>
-              <div className="max-w-4xl mx-auto space-y-6">
-                {faqs.map((faq, index) => (
-                  <div key={index} className="glass-card p-8 rounded-3xl hover-glow transition-all duration-300 transform hover:-translate-y-1">
-                    <h3 className="text-xl font-bold text-violet-400 mb-4">{faq.question}</h3>
-                    <p className="text-gray-300 leading-relaxed text-lg">{faq.answer}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </section>
-
         {/* Footer */}
         <footer className="py-16 bg-slate-900/80 backdrop-blur-lg border-t border-white/10">
             <div className="container mx-auto px-4">
@@ -275,7 +238,6 @@ const AboutPage: React.FC = () => {
                             </div>
                             <h1 className="text-2xl font-bold ml-3">Chroma<span className="gradient-text">Flow</span></h1>
                         </div>
-                        <p className="text-gray-400 leading-relaxed">Reviving history, one color at a time, through the power of artificial intelligence.</p>
                     </div>
                     <div>
                         <h3 className="text-xl font-bold mb-6 text-gray-200">Quick Links</h3>
@@ -294,30 +256,6 @@ const AboutPage: React.FC = () => {
                             <li><Link href="/terms-of-service" className="text-gray-400 hover:text-violet-400 transition-colors">Terms of Service</Link></li>
                             <li><a href="#" className="text-gray-400 hover:text-violet-400 transition-colors">Contact Us</a></li>
                         </ul>
-                    </div>
-                    <div>
-                        <h3 className="text-xl font-bold mb-6 text-gray-200">Connect With Us</h3>
-                        <div className="flex space-x-4 mb-6">
-                            <a href="#" className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center hover:bg-blue-500 transition-colors duration-300">
-                                <i className="fab fa-twitter text-xl"></i>
-                            </a>
-                            <a href="#" className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center hover:bg-pink-500 transition-colors duration-300">
-                                <i className="fab fa-instagram text-xl"></i>
-                            </a>
-                            <a href="#" className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center hover:bg-blue-600 transition-colors duration-300">
-                                <i className="fab fa-linkedin-in text-xl"></i>
-                            </a>
-                            <a href="#" className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center hover:bg-gray-700 transition-colors duration-300">
-                                <i className="fab fa-github text-xl"></i>
-                            </a>
-                        </div>
-                        <h4 className="text-lg font-bold mb-4 text-gray-300">Newsletter</h4>
-                        <div className="flex">
-                            <input type="email" placeholder="your.email@example.com" className="flex-1 px-4 py-3 rounded-l-xl bg-white/10 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500 backdrop-blur-sm" />
-                            <button className="bg-gradient-to-r from-violet-500 to-purple-600 px-6 py-3 rounded-r-xl hover:from-violet-600 hover:to-purple-700 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900 focus:ring-violet-500">
-                                <i className="fas fa-paper-plane"></i>
-                            </button>
-                        </div>
                     </div>
                 </div>
                 <div className="border-t border-white/10 mt-12 pt-8 text-center text-gray-500">

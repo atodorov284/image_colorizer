@@ -20,6 +20,7 @@ interface ModelCard {
   icon: string;
   gradient: string;
   isRecommended?: boolean;
+  isBase?: boolean; // Optional property to indicate if it's a base model
 }
 
 interface ProcessingState {
@@ -48,24 +49,25 @@ const ChromaFlow: React.FC = () => {
   // Model data
   const models: ModelCard[] = [
     {
-      id: 'landscape',
+      id: 'ResNet18',
       name: 'ResNet18 (Fine-tuned)',
-      description: 'ResNet18 model, pre-trained and fine-tuned for balanced performance.',
+      description: 'Fine-tuned ResNet18 model, using a simplistic approach (MSE)',
       icon: 'fas fa-cogs',
-      gradient: 'from-green-400 to-teal-500'
+      gradient: 'from-green-400 to-teal-500',
+      isBase: true
     },
     {
-      id: 'histocolor',
-      name: 'ViT (Fine-tuned)',
-      description: 'Vision Transformer model, pre-trained and fine-tuned for robust colorization.',
+      id: 'VGG16',
+      name: 'VGG16',
+      description: 'Fine-tuned VGG16, using quantile weight-rebalancing L1 loss, learning-rate scheduler, and AdamW',
       icon: 'fas fa-brain',
       gradient: 'from-red-400 to-pink-500',
       isRecommended: true
     },
     {
-      id: 'turbo',
-      name: 'ViT (Quantized)',
-      description: 'Quantized version of the ViT model for faster inference with minimal quality loss.',
+      id: 'VGG16 (Quantized)',
+      name: 'VGG16 (Quantized)',
+      description: 'Dynamically quantized VGG16-INT8 model for lower resource usage',
       icon: 'fas fa-bolt',
       gradient: 'from-purple-500 to-indigo-600'
     }
@@ -162,10 +164,10 @@ const ChromaFlow: React.FC = () => {
     setProcessingState({ isProcessing: true, showResults: false });
 
     const getApiModelType = (modelId: string): string => {
-      if (modelId === 'histocolor') return 'vit';      // ViT (Fine-tuned)
-      if (modelId === 'landscape') return 'resnet';   // ResNet18 (Fine-tuned)
-      if (modelId === 'turbo') return 'quant';     // ViT (Quantized)
-      return 'vit'; // Default to vit
+      if (modelId === 'VGG16') return 'VGG16';      // VGG16 (Quantized) (Fine-tuned)
+      if (modelId === 'ResNet18') return 'resnet';   // ResNet18 (Fine-tuned)
+      if (modelId === 'VGG16 (Quantized)') return 'VGG16 (Quantized)';     // VGG16 (Quantized) (Quantized)
+      return 'VGG16'; // Default to VGG16
     };
 
     const formData = new FormData();
@@ -214,9 +216,9 @@ const ChromaFlow: React.FC = () => {
             <nav className="hidden md:block">
               <ul className="flex space-x-8">
                 <li><a href="#" className="hover:text-red-400 transition">Home</a></li>
-                <li><a href="#" className="hover:text-red-400 transition">Models</a></li>
-                <li><a href="#" className="hover:text-red-400 transition">Gallery</a></li>
-                <li><a href="#" className="hover:text-red-400 transition">About</a></li>
+                <li><a href="/models" className="hover:text-red-400 transition">Models</a></li>
+                <li><a href="/gallery" className="hover:text-red-400 transition">Gallery</a></li>
+                <li><a href="/about" className="hover:text-red-400 transition">About</a></li>
               </ul>
             </nav>
             <button className="md:hidden text-2xl">
@@ -236,12 +238,14 @@ const ChromaFlow: React.FC = () => {
                 Image colorization using different deep learning models.
               </p>
               <div className="flex flex-col md:flex-row justify-center space-y-4 md:space-y-0 md:space-x-6">
-                <button className="bg-gradient-to-r from-blue-500 to-pink-500 hover:opacity-90 px-8 py-4 rounded-full text-lg font-semibold transition transform hover:-translate-y-1">
-                  Try Colorizing an Image
-                </button>
-                <button className="bg-slate-600 hover:bg-opacity-80 px-8 py-4 rounded-full text-lg font-semibold transition transform hover:-translate-y-1">
-                  <i className="fas fa-images mr-2"></i> View Examples
-                </button>
+                <div className="bg-gradient-to-r from-blue-500 to-pink-500 px-8 py-4 rounded-full text-lg font-semibold transition transform">
+                  Try Colorizing an Image Below
+                </div>
+                <a href="/gallery">
+                  <button className="bg-slate-600 hover:bg-opacity-80 px-8 py-4 rounded-full text-lg font-semibold transition transform hover:-translate-y-1">
+                    <i className="fas fa-images mr-2"></i> View Examples
+                  </button>
+                </a>
               </div>
             </div>
           </div>
@@ -277,8 +281,14 @@ const ChromaFlow: React.FC = () => {
                         <p className="text-gray-300 text-sm">{model.description}</p>
                         {model.isRecommended && (
                           <div className="mt-4">
-                            <span className="text-sm bg-red-400/30 py-1 px-3 rounded-full">Base Model</span>
+                            <span className="text-sm bg-red-400/30 py-1 px-3 rounded-full">Recommended Model</span>
                           </div>
+                        )}
+                        {model.isBase && (
+                          <div className="mt-4">
+                            <span className="text-sm bg-red-100/30 py-1 px-3 rounded-full">Base Model</span>
+                          </div>
+                        
                         )}
                       </div>
                     </div>
@@ -447,13 +457,13 @@ const ChromaFlow: React.FC = () => {
                 {
                   icon: 'fas fa-layer-group',
                   title: 'Multiple Model Architectures',
-                  description: 'Explore colorization with different model backbones like Vision Transformers (ViT) and ResNet.',
+                  description: 'Explore colorization with different model backbones like VGG16 and ResNet.',
                   gradient: 'from-blue-500 to-pink-500'
                 },
                 {
                   icon: 'fas fa-bolt',
                   title: 'Efficient Processing',
-                  description: 'Includes a quantized ViT model for faster inference, demonstrating a trade-off between speed and precision.',
+                  description: 'Includes a quantized VGG16 model for faster inference, demonstrating a trade-off between speed and precision.',
                   gradient: 'from-red-400 to-orange-500'
                 },
                 {
@@ -491,10 +501,16 @@ const ChromaFlow: React.FC = () => {
 
               <div>
                 <h3 className="text-lg font-semibold mb-4">Quick Links</h3>
-                <ul className="space-y-2">
-                  {['Home', 'Gallery', 'About'].map((link) => (
-                    <li key={link}>
-                      <a href="#" className="text-gray-400 hover:text-red-400 transition">{link}</a>
+                <ul>
+                  {[
+                    { name: 'Home', href: '#' },
+                    { name: 'Gallery', href: '/gallery' },
+                    { name: 'About', href: '/about' },
+                  ].map((link) => (
+                    <li key={link.name}>
+                      <a href={link.href} className="text-gray-400 hover:text-red-400 transition">
+                        {link.name}
+                      </a>
                     </li>
                   ))}
                 </ul>
@@ -503,37 +519,24 @@ const ChromaFlow: React.FC = () => {
               <div>
                 <h3 className="text-lg font-semibold mb-4">Resources</h3>
                 <ul className="space-y-2">
-                  {['GitHub Repository', 'Paper (if any)', 'Model Details'].map((link) => (
-                    <li key={link}>
-                      <a href="#" className="text-gray-400 hover:text-red-400 transition">{link}</a>
+                  {[{name: 'GitHub Repository', href:'https://github.com/atodorov284/image_colorizer.git'}, 
+                   {name:'Model Details', href:'/models'},
+                   {name: 'Terms of Service', href: '/terms-of-service'},
+                   {name: 'Privacy Policy', href: '/privacy-policy'}
+                  ].map((link) => (
+                    <li key={link.name}>
+                      <a href={link.href} className="text-gray-400 hover:text-red-400 transition">{link.name}</a>
                     </li>
                   ))}
                 </ul>
               </div>
-
-              <div>
-                <h3 className="text-lg font-semibold mb-4">Connect With Us</h3>
-                <div className="flex space-x-4">
-                  {['twitter', 'instagram', 'github', 'discord'].map((social) => (
-                    <a key={social} href="#" className="w-10 h-10 rounded-full bg-slate-600 flex items-center justify-center hover:bg-red-400 transition">
-                      <i className={`fab fa-${social}`}></i>
-                    </a>
-                  ))}
-                </div>
-                <div className="mt-6">
-                  <h4 className="mb-2">Subscribe to Updates</h4>
-                  <div className="flex">
-                    <input type="email" placeholder="Your email" className="px-4 py-2 rounded-l-full bg-gray-800 text-white focus:outline-none w-full" />
-                    <button className="bg-red-400 px-4 py-2 rounded-r-full hover:opacity-90">
-                      <i className="fas fa-paper-plane"></i>
-                    </button>
-                  </div>
-                </div>
-              </div>
             </div>
 
             <div className="border-t border-gray-800 mt-10 pt-6 text-center text-gray-600">
-              <p>© 2023 AML Project. Content for demonstration purposes.</p>
+              <p>
+                &copy; {new Date().getFullYear()} ChromaFlow. Made with{" "}
+                <i className="fas fa-heart text-violet-400"></i> in Groningen.
+              </p>
             </div>
           </div>
         </footer>
