@@ -262,7 +262,6 @@ class VGGPipeline(BasePipeline):
 
             print(f"VGG Epoch {epoch}: Train Loss={train_loss:.6f}, Val Loss={val_loss:.6f}")
 
-            # Save checkpoint
             end_time = datetime.now()
             checkpoint = {
                 "epoch": epoch,

@@ -12,7 +12,6 @@ class ColorizationPipeline:
     PIPELINE_REGISTRY = {
         "resnet": ResNetPipeline,
         "vgg": VGGPipeline,
-        # Can easily add more: "vit": ViTPipeline, "unet": UNetPipeline, etc.
     }
     
     def __init__(self, config: Dict[str, Any], model: nn.Module, device: torch.device):
@@ -35,7 +34,6 @@ class ColorizationPipeline:
             raise ValueError(f"Unknown model type: {model_name}. "
                            f"Available: {list(self.PIPELINE_REGISTRY.keys())}")
         
-        # Create the appropriate pipeline
         pipeline_class = self.PIPELINE_REGISTRY[model_name]
         self.pipeline = pipeline_class(config, model, device)
         
