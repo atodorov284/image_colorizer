@@ -62,22 +62,19 @@ class ModelComparison:
     def predict_single_model(
         self, model_name: str, input_image: Image.Image, target_size: Tuple[int, int]
     ) -> Optional[np.ndarray]:
-        """Get prediction from a single model with consistent sizing."""
+        """Get prediction from a single model with consistent sizing and upscaling to original."""
         if model_name not in self.models:
             return None
 
         model = self.models[model_name]
 
-        # Ensure input image is resized to target size for all models
-        resize_transform = transforms.Resize(target_size)
-        resized_input = resize_transform(input_image)
-
         if model_name.lower() == "vgg":
-            return PredictingUtils.predict_vgg(model, self.device, resized_input)
+            return PredictingUtils.predict_vgg(model, self.device, input_image)
+        elif model_name.lower() == "resnet":
+            return PredictingUtils.predict_resnet(model, self.device, input_image)
         else:
-            lll, _ = ColorizationUtils.preprocess_image(resized_input, target_size)
-            predicted_ab = PredictingUtils.predict_resnet(model, self.device, lll)
-            return ColorizationUtils.reconstruct_image(lll, predicted_ab)
+            print(f"Unknown model type: {model_name}")
+            return None
 
     def compare_models(
         self,
