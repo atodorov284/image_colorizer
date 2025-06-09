@@ -17,7 +17,7 @@ class PredictingUtils:
 
     @staticmethod
     @torch.no_grad()
-    def predict(
+    def predict_vgg(
         model: torch.nn.Module, device: torch.device, input_image: Image.Image
     ) -> np.ndarray:
         """
@@ -36,6 +36,27 @@ class PredictingUtils:
         ab_predicted = model(l_resized_tensor).cpu()
         colorized_img = PredictingUtils.postprocess_tens(l_orig_tensor, ab_predicted)
         return colorized_img
+    
+    @staticmethod
+    @torch.no_grad()
+    def predict_resnet(model, device, lll_input_tensor: torch.Tensor) -> torch.Tensor:
+        """
+        Predicts AB channels for a single LLL input tensor.
+
+        Parameters
+        ----------
+        lll_input_tensor : torch.Tensor
+            Input tensor (LLL).
+
+        Returns
+        -------
+        torch.Tensor
+            Predicted AB channels tensor.
+        """
+        model.eval()
+        input_batch = lll_input_tensor.unsqueeze(0).to(device)
+        predicted_ab = model(input_batch).squeeze(0).cpu()
+        return predicted_ab
 
     @staticmethod
     def collect_images(image_dir: str, subset_percent: float) -> List[str]:
