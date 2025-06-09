@@ -14,7 +14,7 @@ from utils.colorization_utils import ColorizationUtils
 
 class ModelType(str, Enum):
     RESNET = "resnet"
-    VIT = "vit"
+    VGG = "vgg"
     QUANT = "quant"
 
 
@@ -195,10 +195,6 @@ async def predict(model: ModelType, image: UploadFile):
         HTTPException: 415 if image file is invalid
         HTTPException: 501 if selected model is not available
     """
-    if model == ModelType.VIT:
-        raise HTTPException(
-            status_code=501, detail="ViT model not trained yet – check back later!"
-        )
 
     if model == ModelType.QUANT:
         raise HTTPException(
@@ -216,7 +212,14 @@ async def predict(model: ModelType, image: UploadFile):
             detail="Invalid image file. Please upload a valid image in JPEG, PNG, TIFF, BMP, WebP, or other PIL-supported format.",
         )
 
-    out_img = MODEL_HUB.colorize_with_resnet(pil_img)
+    if model == ModelType.RESNET:
+        out_img = MODEL_HUB.colorize_with_resnet(pil_img)
+    elif model == ModelType.VGG:
+        out_img = MODEL_HUB.colorize_with_vgg(pil_img)
+    elif model == ModelType.QUANT:
+        raise HTTPException(
+            status_code=501, detail="QUANT model not trained yet – check back later!"
+        )
 
     buffer = io.BytesIO()
     out_img.save(buffer, format="PNG")
