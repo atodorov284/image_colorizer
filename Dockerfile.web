@@ -1,0 +1,28 @@
+# syntax=docker/dockerfile:1.7
+FROM python:3.12-slim
+
+RUN apt-get update -y && \
+    apt-get install -y --no-install-recommends \
+        curl gnupg ca-certificates build-essential && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
+    apt-get install -y --no-install-recommends nodejs && \
+    corepack enable && corepack prepare pnpm@latest --activate
+
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /bin/uv
+
+WORKDIR /app
+COPY pyproject.toml uv.lock ./
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --frozen --no-install-project
+
+COPY web/ web/
+WORKDIR /app/web
+COPY web/package.json web/pnpm-lock.yaml ./
+RUN --mount=type=cache,target=/root/.local/share/pnpm \
+    pnpm install --frozen-lockfile --force
+
+
+EXPOSE 3000
+CMD ["pnpm", "run", "dev"]
