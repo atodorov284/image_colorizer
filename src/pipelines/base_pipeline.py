@@ -3,6 +3,8 @@ from abc import ABC, abstractmethod
 import torch
 import torch.nn as nn
 
+import os
+
 
 class BasePipeline(ABC):
     """
@@ -21,10 +23,12 @@ class BasePipeline(ABC):
         self.config = config
         self.model = model.to(device)
         self.device = device
-        self.optimizer = None
-        self.criterion = None
-        self.train_loader = None
-        self.val_loader = None
+        
+        # Common setup
+        self.checkpoint_dir = self.config["output"]["checkpoint_dir"]
+        os.makedirs(self.checkpoint_dir, exist_ok=True)
+        self.best_model_dir = self.config["output"]["best_model_dir"]
+        os.makedirs(self.best_model_dir, exist_ok=True)
 
     @abstractmethod
     def setup_loaders(self) -> None:

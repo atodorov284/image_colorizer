@@ -3,3 +3,11 @@ data/
 .ruff_cache
 __pycache__
 *.pth
+
+*.out
+
+custom_tests/
+outputs/
+*.jpg
+*.png
+*.jpeg
