@@ -22,6 +22,7 @@ class ModelHub:
         )
         self._load_resnet()
         self._load_vgg()
+        self._load_quantized_vgg()
 
     def _load_resnet(self) -> None:
         with open("configs/resnet_config.yaml", "r") as fh:
@@ -36,6 +37,8 @@ class ModelHub:
             model.load_state_dict(state_dict)
             model.to(self.device).eval()
             self.resnet = model
+        else:
+            raise FileNotFoundError(f"Checkpoint not found: {ckpt}. Please train the model first.")
 
     def _load_vgg(self) -> None:
         with open("configs/vgg_config.yaml", "r") as fh:
@@ -50,19 +53,41 @@ class ModelHub:
             model.load_state_dict(state_dict)
             model.to(self.device).eval()
             self.vgg = model
+        else:
+            raise FileNotFoundError(f"Checkpoint not found: {ckpt}. Please train the model first.")
+        
+    def _load_quantized_vgg(self) -> None:
+        """Load the quantized VGG model."""
+        with open("configs/vgg_config.yaml", "r") as fh:
+            cfg_vgg = yaml.safe_load(fh)
+
+        ckpt = f"../{cfg_vgg['output']['best_model_dir']}/best_model_dynamic_int8.pth"
+        print(f"Loading VGG model from {ckpt}")
+        if os.path.exists(ckpt):
+            model = VGGColorizationModel(pretrained=False)
+            model = torch.load(ckpt, map_location=self.device, weights_only=False)
+            model.to(self.device).eval()
+            self.quant = model
+        else:
+            raise FileNotFoundError(f"Checkpoint not found: {ckpt}. Please train the model first.")
 
     def colorize_with_resnet(self, pil_rgb: Image.Image) -> Image.Image:
         """Colorise *pil_rgb* using the ResNet colourisation model."""
-        lll, _ = ColorizationUtils.preprocess_image(pil_rgb, self.res_target_size)
         with torch.no_grad():
-            ab = PredictingUtils.predict_resnet(self.resnet, self.device, lll)
+            rgb_np = PredictingUtils.predict_resnet(self.resnet, self.device, pil_rgb, pil_rgb.size)
 
-        rgb_np = ColorizationUtils.reconstruct_image(lll, ab)
         return Image.fromarray((rgb_np * 255).clip(0, 255).astype("uint8"))
 
     def colorize_with_vgg(self, pil_rgb: Image.Image) -> Image.Image:
         """Colorise *pil_rgb* using the VGG colourisation model."""
         with torch.no_grad():
-            rgb_np = PredictingUtils.predict_vgg(self.vgg, self.device, pil_rgb)
+            rgb_np = PredictingUtils.predict_vgg(self.vgg, self.device, pil_rgb, pil_rgb.size)
+
+        return Image.fromarray((rgb_np * 255).clip(0, 255).astype("uint8"))
+    
+    def colorize_with_quantized_vgg(self, pil_rgb: Image.Image) -> Image.Image:
+        """Colorise *pil_rgb* using the quantized VGG colourisation model."""
+        with torch.no_grad():
+            rgb_np = PredictingUtils.predict_vgg(self.quant, self.device, pil_rgb, pil_rgb.size)
 
         return Image.fromarray((rgb_np * 255).clip(0, 255).astype("uint8"))

@@ -166,8 +166,8 @@ const ChromaFlow: React.FC = () => {
     const getApiModelType = (modelId: string): string => {
       if (modelId === 'VGG16') return 'vgg';      // VGG16 (Quantized) (Fine-tuned)
       if (modelId === 'ResNet18') return 'resnet';   // ResNet18 (Fine-tuned)
-      if (modelId === 'VGG16 (Quantized)') return 'VGG16 (Quantized)';     // VGG16 (Quantized) (Quantized)
-      return 'VGG16'; // Default to VGG16
+      if (modelId === 'VGG16 (Quantized)') return 'quant';     // VGG16 (Quantized) (Quantized)
+      return 'vgg'; // Default to VGG16
     };
 
     const formData = new FormData();

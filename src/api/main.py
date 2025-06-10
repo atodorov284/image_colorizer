@@ -196,11 +196,6 @@ async def predict(model: ModelType, image: UploadFile):
         HTTPException: 501 if selected model is not available
     """
 
-    if model == ModelType.QUANT:
-        raise HTTPException(
-            status_code=501, detail="QUANT model not trained yet – check back later!"
-        )
-
     try:
         image.file.seek(0)
         pil_img = Image.open(image.file)
@@ -217,9 +212,7 @@ async def predict(model: ModelType, image: UploadFile):
     elif model == ModelType.VGG:
         out_img = MODEL_HUB.colorize_with_vgg(pil_img)
     elif model == ModelType.QUANT:
-        raise HTTPException(
-            status_code=501, detail="QUANT model not trained yet – check back later!"
-        )
+        out_img = MODEL_HUB.colorize_with_quantized_vgg(pil_img)
 
     buffer = io.BytesIO()
     out_img.save(buffer, format="PNG")
