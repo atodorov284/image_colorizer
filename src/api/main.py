@@ -229,7 +229,7 @@ async def predict(model: ModelType, image: UploadFile):
 
 @app.post("/preview", 
     summary="Get grayscale preview",
-    description="Returns the grayscale, resized version of the input image that will be fed to the model",
+    description="Returns the grayscale version of the input",
     responses={
         200: {
             "description": "Grayscale preview image",
@@ -250,13 +250,13 @@ async def preview(image: UploadFile):
         pil_img = Image.open(image.file)
         pil_img = ImageOps.exif_transpose(pil_img)
         pil_img = pil_img.convert("RGB")
-        
+
         # Use the same preprocessing as the model
-        lll, _ = ColorizationUtils.preprocess_image(pil_img, MODEL_HUB.res_target_size)
+        lll, _ = ColorizationUtils.preprocess_image(pil_img, (pil_img.size[1], pil_img.size[0]))
         
         # Convert the L channel back to grayscale image
         gray_img = Image.fromarray((lll[0].numpy() * 255).astype('uint8'))
-        
+
         # Return the preview image
         buffer = io.BytesIO()
         gray_img.save(buffer, format="PNG")

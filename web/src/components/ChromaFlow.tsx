@@ -164,7 +164,7 @@ const ChromaFlow: React.FC = () => {
     setProcessingState({ isProcessing: true, showResults: false });
 
     const getApiModelType = (modelId: string): string => {
-      if (modelId === 'VGG16') return 'VGG16';      // VGG16 (Quantized) (Fine-tuned)
+      if (modelId === 'VGG16') return 'vgg';      // VGG16 (Quantized) (Fine-tuned)
       if (modelId === 'ResNet18') return 'resnet';   // ResNet18 (Fine-tuned)
       if (modelId === 'VGG16 (Quantized)') return 'VGG16 (Quantized)';     // VGG16 (Quantized) (Quantized)
       return 'VGG16'; // Default to VGG16

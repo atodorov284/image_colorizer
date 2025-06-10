@@ -6,13 +6,11 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /bin/uv
 WORKDIR /app
 
 COPY pyproject.toml uv.lock ./
-RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync --frozen --no-install-project
+RUN uv sync
 
 COPY ./src ./src
 COPY ./resnet/best_model ./resnet/best_model
-
-RUN uv sync --frozen
+COPY ./vgg/best_model ./vgg/best_model
 
 ENV PATH="/app/.venv/bin:${PATH}"
 

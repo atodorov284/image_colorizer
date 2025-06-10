@@ -62,9 +62,6 @@ class ModelHub:
 
     def colorize_with_vgg(self, pil_rgb: Image.Image) -> Image.Image:
         """Colorise *pil_rgb* using the VGG colourisation model."""
-        resize_transform = transforms.Resize(self.vgg_target_size)
-        pil_resized = resize_transform(pil_rgb)
-
         with torch.no_grad():
             rgb_np = PredictingUtils.predict_vgg(self.vgg, self.device, pil_rgb)
 

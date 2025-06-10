@@ -14,14 +14,12 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /bin/uv
 
 WORKDIR /app
 COPY pyproject.toml uv.lock ./
-RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync --frozen --no-install-project
+RUN uv sync
 
 COPY web/ web/
 WORKDIR /app/web
 COPY web/package.json web/pnpm-lock.yaml ./
-RUN --mount=type=cache,target=/root/.local/share/pnpm \
-    pnpm install --frozen-lockfile --force
+RUN pnpm install --force
 
 
 EXPOSE 3000
