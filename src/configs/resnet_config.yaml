@@ -22,8 +22,8 @@ training:
   subset_percent: 0.1
 
 testing:
-  test_dir: ./data/test2017
-  subset_percent: 0.05
+  test_dir: ./custom_tests
+  subset_percent: 1.0
   predicted_image_dir: ./test/colorised_images
   visualisation: True
   visualisation_dir: ./test/visualisations

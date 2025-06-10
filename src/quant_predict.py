@@ -86,26 +86,11 @@ if __name__ == "__main__":
 
     for img_path in tqdm(img_paths, desc="Predicting"):
         pil_in = Image.open(img_path).convert("RGB")
-
-        if model_uses_classification:
-            ab_bins = ColorizationUtils.get_ab_bins().to(device)
-            annealed_mean_temp = config["testing"]["annealed_mean_temp"]
-            l_orig_tensor, l_resized_tensor = PredictingUtils.preprocess_img(
-                np.array(pil_in), target_hw=target_size
-            )
-            l_resized_tensor = l_resized_tensor.to(device)
-            with torch.no_grad():
-                ab_logits = model(l_resized_tensor)
-                ab_predicted = ColorizationUtils.annealed_mean_prediction(
-                    ab_logits, ab_bins, temperature=annealed_mean_temp
-                ).cpu()
-            out_img = PredictingUtils.postprocess_tens(l_orig_tensor, ab_predicted)
-        else:
-            out_img = PredictingUtils.predict(model, device, np.array(pil_in))
-            # plt.imshow(out_img)
-            # plt.title("Colorized Image")
-            # plt.axis("off")
-            # plt.show()
+        out_img = PredictingUtils.predict(model, device, np.array(pil_in))
+        # plt.imshow(out_img)
+        # plt.title("Colorized Image")
+        # plt.axis("off")
+        # plt.show()
 
         # Update peak memory usage
         current_mem = get_memory_usage_mb()
