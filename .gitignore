@@ -2,7 +2,6 @@ data/
 .venv
 .ruff_cache
 __pycache__
-*.pth
 
 *.out
 
