@@ -1,3 +1,4 @@
+// web/src/app/gallery/page.tsx
 "use client"
 
 import React, { useState, useEffect } from 'react';
@@ -5,6 +6,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import Head from 'next/head';
 import { motion, AnimatePresence } from 'framer-motion';
+import { usePathname } from 'next/navigation';
 
 interface GalleryImage {
   id: string;
@@ -108,6 +110,12 @@ const Gallery: React.FC<GalleryProps> = ({
   images: imagesProp, 
   onImageDelete 
 }) => {
+  const pathname = usePathname();
+  const navLinks = [
+      { href: '/', name: 'Home' },
+      { href: '/gallery', name: 'Gallery' },
+      { href: '/about', name: 'About' },
+  ];
   const [displayImages, setDisplayImages] = useState<GalleryImage[]>(imagesProp || initialMockImages);
   const [selectedImage, setSelectedImage] = useState<GalleryImage | null>(null);
   const [showOriginalInViewModal, setShowOriginalInViewModal] = useState(false);
@@ -203,33 +211,42 @@ const Gallery: React.FC<GalleryProps> = ({
         <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
       </Head>
 
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 py-8 font-[Poppins,sans-serif]">
-        <header className="py-6 mb-8 sticky top-0 z-40 bg-gray-900/70 backdrop-blur-md border-b border-gray-700">
-          {/* ... (Header JSX from previous step, no changes needed here) ... */}
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 font-[Poppins,sans-serif]">
+        <header className="py-6 sticky top-0 z-50 bg-slate-900/80 backdrop-blur-lg border-b border-white/10">
           <div className="container mx-auto px-4 flex justify-between items-center">
-            <Link href="/">
-              <div className="flex items-center cursor-pointer">
-                <div className="bg-gradient-to-r from-blue-500 to-purple-600 w-10 h-10 rounded-lg flex items-center justify-center mr-2">
-                  <i className="fas fa-palette text-white text-xl"></i>
+            <Link href="/" className="flex items-center group cursor-pointer">
+                <div className="bg-gradient-to-r from-blue-500 to-pink-500 w-12 h-12 rounded-full flex items-center justify-center group-hover:shadow-lg group-hover:shadow-pink-500/25 transition-all duration-300">
+                    <i className="fas fa-palette text-white text-2xl"></i>
                 </div>
-                <h1 className="text-2xl font-bold text-white">Chroma<span className="text-blue-400">Flow</span></h1>
-              </div>
+                <h1 className="text-3xl font-[900] ml-3">
+                    Chroma<span className="text-red-400">Flow</span>
+                </h1>
             </Link>
             <nav className="hidden md:block">
-              <ul className="flex space-x-6 items-center">
-                <li><Link href="/" className="text-gray-300 hover:text-blue-400 transition">Home</Link></li>
-                <li><Link href="/models" className="text-gray-300 hover:text-blue-400 transition">Models</Link></li>
-                <li><Link href="/gallery" className="text-blue-400 font-semibold">Gallery</Link></li>
-                <li><Link href="/about" className="text-gray-300 hover:text-blue-400 transition">About</Link></li>
+              <ul className="flex space-x-8">
+                {navLinks.map((link) => (
+                  <li key={link.href}>
+                    <Link
+                      href={link.href}
+                      className={`transition ${
+                        pathname === link.href
+                          ? 'text-red-400 font-semibold'
+                          : 'text-gray-300 hover:text-red-400'
+                      }`}
+                    >
+                      {link.name}
+                    </Link>
+                  </li>
+                ))}
               </ul>
             </nav>
-            <button className="md:hidden text-gray-300 hover:text-white text-2xl">
+            <button className="md:hidden text-2xl text-gray-300 hover:text-white focus:outline-none">
                 <i className="fas fa-bars"></i>
             </button>
           </div>
         </header>
         
-        <div className="container mx-auto px-4">
+        <main className="container mx-auto px-4 py-12">
           <div className="text-center mb-12">
             <h1 className="text-5xl font-bold text-white mb-4">
               Your <span className="bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">Gallery</span>
@@ -322,7 +339,7 @@ const Gallery: React.FC<GalleryProps> = ({
 
           {filteredImages.length === 0 && ( /* ... (Empty state JSX, no changes) ... */ 
             <div className="text-center py-20"> <i className="fas fa-images text-6xl text-gray-600 mb-6"></i> <h3 className="text-2xl font-semibold text-gray-400 mb-3"> Your Gallery is Empty </h3> <p className="text-gray-500 max-w-md mx-auto"> {filter === 'all' ? "It looks like you haven't colorized any photos yet. Start creating to see your masterpieces here!" : `You haven't colorized any images using the ${filter} model. Try it out or select another filter.`} </p> </div>)}
-        </div>
+        </main>
 
         {/* View Image Modal */}
         <AnimatePresence>

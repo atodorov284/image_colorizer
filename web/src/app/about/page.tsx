@@ -1,10 +1,24 @@
+// web/src/app/about/page.tsx
 "use client"
 import React from 'react';
 import Head from 'next/head';
 import Image from 'next/image';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 const AboutPage: React.FC = () => {
+  const pathname = usePathname();
+  const navLinks = [
+      { href: '/', name: 'Home' },
+      { href: '/gallery', name: 'Gallery' },
+      { href: '/about', name: 'About' },
+  ];
+
+  const handleScrollToTeam = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    document.getElementById('team')?.scrollIntoView({ behavior: 'smooth' });
+  };
+
   const teamMembers = [
     {
       name: 'Sven van Loon',
@@ -32,59 +46,13 @@ const AboutPage: React.FC = () => {
     }
   ];
 
-  const values = [
-    {
-      icon: 'fas fa-heart',
-      title: 'Preserve Memories',
-      description: 'We believe every photograph tells a story worth preserving in its full, colorful glory.',
-      color: 'from-rose-500 to-pink-500'
-    },
-    {
-      icon: 'fas fa-shield-alt',
-      title: 'Privacy First',
-      description: 'Your images are your memories. We never store, share, or use them for any other purpose.',
-      color: 'from-emerald-500 to-teal-500'
-    },
-    {
-      icon: 'fas fa-rocket',
-      title: 'Innovation',
-      description: 'Continuously pushing the boundaries of AI to deliver better, faster, more accurate results.',
-      color: 'from-violet-500 to-purple-500'
-    },
-    {
-      icon: 'fas fa-users',
-      title: 'Accessibility',
-      description: 'Making advanced AI technology accessible to everyone, regardless of technical expertise.',
-      color: 'from-blue-500 to-indigo-500'
-    }
-  ];
-
-const techStack = [
-  { name: 'React', category: 'Frontend Framework', icon: '⚛️', color: 'bg-gradient-to-br from-blue-400 to-yellow-600' },
-  { name: 'PyTorch', category: 'ML Framework', icon: '🔥', color: 'bg-gradient-to-br from-white-500 to-red-500' },
-  { name: 'Next.js', category: 'Full-stack Framework', icon: '▲', color: 'bg-gradient-to-br from-gray-700 to-gray-900' },
-  { name: 'Tailwind', category: 'CSS Framework', icon: '🎨', color: 'bg-gradient-to-br from-green-400 to-blue-500' },
-  { name: 'Docker', category: 'Containerization', icon: '🐳', color: 'bg-gradient-to-br from-blue-500 to-cyan-700' },
-  { name: 'TypeScript', category: 'Programming Language', icon: '📘', color: 'bg-gradient-to-br from-orange-600 to-blue-800' }
-];
-
-  const faqs = [
-    {
-      question: 'How does ChromaFlow work?',
-      answer: 'ChromaFlow uses advanced deep learning neural networks trained on millions of color images to understand and predict realistic colors for black and white photos.'
-    },
-    {
-      question: 'Is my data safe?',
-      answer: 'Absolutely. We use end-to-end encryption and never store your images. All processing happens in real-time and images are deleted immediately after.'
-    },
-    {
-      question: 'What makes ChromaFlow different?',
-      answer: 'Our proprietary AI models are specifically trained for different image types, ensuring the best results whether you\'re colorizing portraits, landscapes, or historical documents.'
-    },
-    {
-      question: 'Can I use ChromaFlow commercially?',
-      answer: 'Yes! We offer commercial licenses and API access for businesses. Contact our sales team for custom pricing and enterprise features.'
-    }
+  const techStack = [
+    { name: 'React', category: 'Frontend Framework', icon: '⚛️', color: 'bg-gradient-to-br from-blue-400 to-yellow-600' },
+    { name: 'PyTorch', category: 'ML Framework', icon: '🔥', color: 'bg-gradient-to-br from-white-500 to-red-500' },
+    { name: 'Next.js', category: 'Full-stack Framework', icon: '▲', color: 'bg-gradient-to-br from-gray-700 to-gray-900' },
+    { name: 'Tailwind', category: 'CSS Framework', icon: '🎨', color: 'bg-gradient-to-br from-green-400 to-blue-500' },
+    { name: 'Docker', category: 'Containerization', icon: '🐳', color: 'bg-gradient-to-br from-blue-500 to-cyan-700' },
+    { name: 'TypeScript', category: 'Programming Language', icon: '📘', color: 'bg-gradient-to-br from-orange-600 to-blue-800' }
   ];
 
   return (
@@ -101,13 +69,13 @@ const techStack = [
           font-family: 'Inter', sans-serif;
         }
         .glass-card {
-          background: rgba(255, 255, 255, 0.05); /* Slightly more subtle background */
-          backdrop-filter: blur(12px); /* Increased blur */
-          border: 1px solid rgba(255, 255, 255, 0.1); /* Softer border */
-          box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1); /* Softer shadow for depth */
+          background: rgba(255, 255, 255, 0.05);
+          backdrop-filter: blur(12px);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1);
         }
         .hover-glow:hover {
-          box-shadow: 0 0 30px rgba(139, 92, 246, 0.3), 0 0 15px rgba(192, 132, 252, 0.2); /* Enhanced glow */
+          box-shadow: 0 0 30px rgba(139, 92, 246, 0.3), 0 0 15px rgba(192, 132, 252, 0.2);
         }
         .floating {
           animation: float 6s ease-in-out infinite;
@@ -117,11 +85,11 @@ const techStack = [
           50% { transform: translateY(-10px); }
         }
         .gradient-text {
-          background: linear-gradient(135deg, #8B5CF6 0%, #C084FC 100%); /* Adjusted gradient for better readability */
+          background: linear-gradient(135deg, #8B5CF6 0%, #C084FC 100%);
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
           background-clip: text;
-          text-fill-color: transparent; /* Standard property */
+          text-fill-color: transparent;
         }
       `}</style>
 
@@ -129,23 +97,33 @@ const techStack = [
         {/* Header */}
         <header className="py-6 sticky top-0 z-50 bg-slate-900/80 backdrop-blur-lg border-b border-white/10">
           <div className="container mx-auto px-4 flex justify-between items-center">
-            <Link href="/">
-              <div className="flex items-center cursor-pointer group">
-                <div className="bg-gradient-to-r from-violet-500 to-purple-600 w-12 h-12 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-purple-500/25 transition-all duration-300">
-                  <i className="fas fa-palette text-white text-xl"></i>
+            <Link href="/" className="flex items-center group cursor-pointer">
+                <div className="bg-gradient-to-r from-blue-500 to-pink-500 w-12 h-12 rounded-full flex items-center justify-center group-hover:shadow-lg group-hover:shadow-pink-500/25 transition-all duration-300">
+                    <i className="fas fa-palette text-white text-2xl"></i>
                 </div>
-                <h1 className="text-3xl font-bold ml-3">Chroma<span className="gradient-text">Flow</span></h1>
-              </div>
+                <h1 className="text-3xl font-[900] ml-3">
+                    Chroma<span className="text-red-400">Flow</span>
+                </h1>
             </Link>
             <nav className="hidden md:block">
               <ul className="flex space-x-8">
-                <li><Link href="/" className="hover:text-violet-400 transition-colors duration-300">Home</Link></li>
-                <li><Link href="/models" className="hover:text-violet-400 transition-colors duration-300">Models</Link></li>
-                <li><Link href="/gallery" className="hover:text-violet-400 transition-colors duration-300">Gallery</Link></li>
-                <li><Link href="/about" className="text-violet-400 font-semibold">About</Link></li>
+                {navLinks.map((link) => (
+                  <li key={link.href}>
+                    <Link
+                      href={link.href}
+                      className={`transition ${
+                        pathname === link.href
+                          ? 'text-red-400 font-semibold'
+                          : 'text-gray-300 hover:text-red-400'
+                      }`}
+                    >
+                      {link.name}
+                    </Link>
+                  </li>
+                ))}
               </ul>
             </nav>
-            <button className="md:hidden text-2xl focus:outline-none hover:text-violet-400 transition-colors">
+            <button className="md:hidden text-2xl text-gray-300 hover:text-white focus:outline-none">
                 <i className="fas fa-bars"></i>
             </button>
           </div>
@@ -166,10 +144,10 @@ const techStack = [
               <p className="text-xl md:text-2xl text-gray-300 mb-12 max-w-3xl mx-auto leading-relaxed">
                 We are pioneers in AI-driven image colorization, dedicated to reviving the past and preserving memories for generations to come.
               </p>
-              <Link href="#team" className="inline-flex items-center bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 text-white px-10 py-5 rounded-2xl text-lg font-semibold transition-all duration-300 transform hover:-translate-y-1 hover:shadow-2xl hover:shadow-purple-500/25">
+              <a href="#team" onClick={handleScrollToTeam} className="inline-flex items-center bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 text-white px-10 py-5 rounded-2xl text-lg font-semibold transition-all duration-300 transform hover:-translate-y-1 hover:shadow-2xl hover:shadow-purple-500/25">
                 <span>Meet The Team</span>
                 <i className="fas fa-arrow-down ml-2"></i>
-              </Link>
+              </a>
             </div>
           </div>
         </section>
@@ -243,7 +221,6 @@ const techStack = [
                         <h3 className="text-xl font-bold mb-6 text-gray-200">Quick Links</h3>
                         <ul className="space-y-3">
                             <li><Link href="/" className="text-gray-400 hover:text-violet-400 transition-colors">Home</Link></li>
-                            <li><Link href="/models" className="text-gray-400 hover:text-violet-400 transition-colors">Our Models</Link></li>
                             <li><Link href="/gallery" className="text-gray-400 hover:text-violet-400 transition-colors">Gallery</Link></li>
                             <li><Link href="/#pricing" className="text-gray-400 hover:text-violet-400 transition-colors">Pricing</Link></li> 
                         </ul>
@@ -252,8 +229,6 @@ const techStack = [
                         <h3 className="text-xl font-bold mb-6 text-gray-200">Company</h3>
                         <ul className="space-y-3">
                             <li><Link href="/about" className="text-gray-400 hover:text-violet-400 transition-colors">About Us</Link></li>
-                            <li><Link href="/privacy-policy" className="text-gray-400 hover:text-violet-400 transition-colors">Privacy Policy</Link></li>
-                            <li><Link href="/terms-of-service" className="text-gray-400 hover:text-violet-400 transition-colors">Terms of Service</Link></li>
                             <li><a href="#" className="text-gray-400 hover:text-violet-400 transition-colors">Contact Us</a></li>
                         </ul>
                     </div>

@@ -1,6 +1,9 @@
+// web/src/components/ChromaFlow.tsx
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 
 // Global type definitions
@@ -29,6 +32,12 @@ interface ProcessingState {
 }
 
 const ChromaFlow: React.FC = () => {
+  const pathname = usePathname();
+  const navLinks = [
+      { href: '/', name: 'Home' },
+      { href: '/gallery', name: 'Gallery' },
+      { href: '/about', name: 'About' },
+  ];
   // State management
   const [selectedModel, setSelectedModel] = useState<string>('histocolor');
   const [processingState, setProcessingState] = useState<ProcessingState>({
@@ -198,31 +207,43 @@ const ChromaFlow: React.FC = () => {
       setProcessingState({ isProcessing: false, showResults: false });
     }
   };
-
+  const handleScrollToColorizer = () => {
+    document.getElementById('colorizer-tool')?.scrollIntoView({ behavior: 'smooth' });
+  };
   return (
     <>
       <div className="bg-gradient-to-br from-slate-900 to-slate-800 min-h-screen text-white font-sans">
         {/* Header */}
-        <header className="py-6">
+        <header className="py-6 sticky top-0 z-50 bg-slate-900/80 backdrop-blur-lg border-b border-white/10">
           <div className="container mx-auto px-4 flex justify-between items-center">
-            <div className="flex items-center">
-              <div className="bg-gradient-to-r from-blue-500 to-pink-500 w-12 h-12 rounded-full flex items-center justify-center">
-                <i className="fas fa-palette text-white text-2xl"></i>
-              </div>
-              <h1 className="text-3xl font-[900] ml-3">
-                Chroma<span className="text-red-400">Flow</span>
-              </h1>
-            </div>
+            <Link href="/" className="flex items-center group cursor-pointer">
+                <div className="bg-gradient-to-r from-blue-500 to-pink-500 w-12 h-12 rounded-full flex items-center justify-center group-hover:shadow-lg group-hover:shadow-pink-500/25 transition-all duration-300">
+                    <i className="fas fa-palette text-white text-2xl"></i>
+                </div>
+                <h1 className="text-3xl font-[900] ml-3">
+                    Chroma<span className="text-red-400">Flow</span>
+                </h1>
+            </Link>
             <nav className="hidden md:block">
               <ul className="flex space-x-8">
-                <li><a href="#" className="hover:text-red-400 transition">Home</a></li>
-                <li><a href="/models" className="hover:text-red-400 transition">Models</a></li>
-                <li><a href="/gallery" className="hover:text-red-400 transition">Gallery</a></li>
-                <li><a href="/about" className="hover:text-red-400 transition">About</a></li>
+                {navLinks.map((link) => (
+                  <li key={link.href}>
+                    <Link
+                      href={link.href}
+                      className={`transition ${
+                        pathname === link.href
+                          ? 'text-red-400 font-semibold'
+                          : 'text-gray-300 hover:text-red-400'
+                      }`}
+                    >
+                      {link.name}
+                    </Link>
+                  </li>
+                ))}
               </ul>
             </nav>
-            <button className="md:hidden text-2xl">
-              <i className="fas fa-bars"></i>
+            <button className="md:hidden text-2xl text-gray-300 hover:text-white focus:outline-none">
+                <i className="fas fa-bars"></i>
             </button>
           </div>
         </header>
@@ -238,9 +259,12 @@ const ChromaFlow: React.FC = () => {
                 Image colorization using different deep learning models.
               </p>
               <div className="flex flex-col md:flex-row justify-center space-y-4 md:space-y-0 md:space-x-6">
-                <div className="bg-gradient-to-r from-blue-500 to-pink-500 px-8 py-4 rounded-full text-lg font-semibold transition transform">
+              <button
+                  onClick={handleScrollToColorizer}
+                  className="bg-gradient-to-r from-blue-500 to-pink-500 px-8 py-4 rounded-full text-lg font-semibold transition transform hover:-translate-y-1 hover:shadow-lg hover:shadow-pink-500/50"
+                >
                   Try Colorizing an Image Below
-                </div>
+                </button>
                 <a href="/gallery">
                   <button className="bg-slate-600 hover:bg-opacity-80 px-8 py-4 rounded-full text-lg font-semibold transition transform hover:-translate-y-1">
                     <i className="fas fa-images mr-2"></i> View Examples
@@ -252,7 +276,7 @@ const ChromaFlow: React.FC = () => {
         </section>
 
         {/* Main Colorizer Tool */}
-        <section className="py-16">
+        <section id="colorizer-tool" className="py-16">
           <div className="container mx-auto px-4">
             <div className="max-w-4xl mx-auto bg-slate-900 rounded-2xl p-8 bg-gradient-to-r from-blue-500/5 to-pink-500/5">
               <h2 className="text-3xl font-bold mb-8 text-center">Image Colorizer Tool</h2>
@@ -520,9 +544,6 @@ const ChromaFlow: React.FC = () => {
                 <h3 className="text-lg font-semibold mb-4">Resources</h3>
                 <ul className="space-y-2">
                   {[{name: 'GitHub Repository', href:'https://github.com/atodorov284/image_colorizer.git'}, 
-                   {name:'Model Details', href:'/models'},
-                   {name: 'Terms of Service', href: '/terms-of-service'},
-                   {name: 'Privacy Policy', href: '/privacy-policy'}
                   ].map((link) => (
                     <li key={link.name}>
                       <a href={link.href} className="text-gray-400 hover:text-red-400 transition">{link.name}</a>

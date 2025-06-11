@@ -23,6 +23,7 @@ dependencies = [
     "streamlit>=1.44.1",
     "torch>=2.6.0",
     "torchvision>=0.21.0",
+    "uvicorn>=0.34.2",
 ]
 
 [tool.ruff.lint]

@@ -89,14 +89,11 @@ class ModelComparison:
         """Compare all loaded models on a single image."""
         pil_input = Image.open(image_path).convert("RGB")
 
-        resize_transform = transforms.Resize(target_size)
-        pil_resized = resize_transform(pil_input)
+        gray_np = np.array(pil_input.convert("L"))
 
-        gray_np = np.array(pil_resized.convert("L"))
+        gt_np = np.array(pil_input)
 
-        gt_np = np.array(pil_resized)
-
-        lll, gt_ab_norm = ColorizationUtils.preprocess_image(pil_resized, target_size)
+        lll, gt_ab_norm = ColorizationUtils.preprocess_image(pil_input, target_size)
         gt_ab_unnorm = gt_ab_norm.detach().cpu().numpy() * ColorizationUtils.AB_SCALE
 
         predictions = {}
@@ -109,7 +106,6 @@ class ModelComparison:
                     pred_pil_temp = Image.fromarray(
                         (pred_rgb * 255.0).clip(0, 255).astype("uint8")
                     )
-                    pred_pil_temp = resize_transform(pred_pil_temp)
                     pred_rgb = np.array(pred_pil_temp) / 255.0
 
                 predictions[model_name] = pred_rgb
@@ -165,7 +161,7 @@ class ModelComparison:
 
         plt.tight_layout()
 
-        output_path = os.path.join(output_dir, f"comparison_{basename}.png")
+        output_path = os.path.join(image_subfolder, f"comparison_{basename}.png")
         plt.savefig(output_path, dpi=150, bbox_inches="tight")
         plt.close()
 
