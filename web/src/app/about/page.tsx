@@ -139,7 +139,7 @@ const AboutPage: React.FC = () => {
           <div className="container mx-auto px-4 relative z-10">
             <div className="max-w-5xl mx-auto text-center">
               <h1 className="text-6xl md:text-7xl lg:text-8xl font-bold mb-8 leading-tight">
-                Bringing <span className="bg-gradient-to-r from-violet-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+                Bringing <span className="bg-gradient-to-r from-violet-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">History to Life</span>
               </h1>
               <a href="#team" onClick={handleScrollToTeam} className="inline-flex items-center bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 text-white px-10 py-5 rounded-2xl text-lg font-semibold transition-all duration-300 transform hover:-translate-y-1 hover:shadow-2xl hover:shadow-purple-500/25">
                 <span>Meet The Team</span>
