@@ -1,25 +1,19 @@
 # syntax=docker/dockerfile:1.7
-FROM python:3.12-slim
+FROM node:20-bookworm-slim
 
-RUN apt-get update -y && \
-    apt-get install -y --no-install-recommends \
-        curl gnupg ca-certificates build-essential && \
-    rm -rf /var/lib/apt/lists/*
+RUN apt-get update -y \
+ && apt-get install -y --no-install-recommends \
+      build-essential git \
+ && rm -rf /var/lib/apt/lists/*
 
-RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
-    apt-get install -y --no-install-recommends nodejs && \
-    corepack enable && corepack prepare pnpm@latest --activate
+RUN corepack enable \
+ && corepack prepare pnpm@latest --activate
 
-COPY --from=ghcr.io/astral-sh/uv:latest /uv /bin/uv
-
-WORKDIR /app
-COPY pyproject.toml uv.lock ./
-RUN uv sync
-
-COPY web/ web/
 WORKDIR /app/web
-COPY web/package.json web/pnpm-lock.yaml ./
+COPY web/pnpm-lock.yaml web/package.json ./
 RUN pnpm install --force
+
+COPY web/ .
 
 
 EXPOSE 3000

@@ -2,7 +2,7 @@ data/
 .venv
 .ruff_cache
 __pycache__
-
+.DS_Store
 *.out
 
 custom_tests/
@@ -10,3 +10,4 @@ outputs/
 *.jpg
 *.png
 *.jpeg
+!web/public/*.jpeg
