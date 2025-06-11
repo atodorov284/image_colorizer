@@ -30,7 +30,7 @@ const initialMockImages: GalleryImage[] = [
     image_c: '/image_ex1_c.jpeg',
     uploadDate: new Date(2023, 0, 15),
     modelUsed: 'ResNet18',
-    fileName: 'vintage-portrait.jpg'
+    fileName: 'Beans lying on grass'
   },
   {
     id: '2',
@@ -38,7 +38,7 @@ const initialMockImages: GalleryImage[] = [
     image_c: '/image_ex2_c.jpeg',
     uploadDate: new Date(2023, 1, 20),
     modelUsed: 'VGG16',
-    fileName: 'mountain-scene.png'
+    fileName: 'Beans climbing a tree'
   },
   {
     id: '3',
@@ -46,7 +46,7 @@ const initialMockImages: GalleryImage[] = [
     image_c: '/image_ex3_c.jpeg',
     uploadDate: new Date(2023, 2, 10),
     modelUsed: 'VGG16 (Quantized)',
-    fileName: 'quick-shot.jpeg'
+    fileName: 'New Macbook'
   },
   {
     id: '4',
@@ -54,7 +54,7 @@ const initialMockImages: GalleryImage[] = [
     image_c: '/image_ex4_c.jpeg',
     uploadDate: new Date(2023, 3, 5),
     modelUsed: 'ResNet18',
-    fileName: 'building-facade.jpg'
+    fileName: 'Beans in basket'
   },
   {
     id: '5',
@@ -62,7 +62,7 @@ const initialMockImages: GalleryImage[] = [
     image_c: '/image_ex5_c.jpeg',
     uploadDate: new Date(2023, 4, 12),
     modelUsed: 'VGG16',
-    fileName: 'forest-path.png'
+    fileName: 'Beans roaming around'
   },
   {
     id: '6',
@@ -70,7 +70,7 @@ const initialMockImages: GalleryImage[] = [
     image_c: '/image_ex6_c.jpeg',
     uploadDate: new Date(2023, 5, 18),
     modelUsed: 'VGG16 (Quantized)',
-    fileName: 'cityscape.jpeg'
+    fileName: 'Beans Headshot'
   },
   {
     id: '7',
@@ -78,7 +78,7 @@ const initialMockImages: GalleryImage[] = [
     image_c: '/image_ex7_c.jpeg',
     uploadDate: new Date(2023, 6, 22),
     modelUsed: 'ResNet18',
-    fileName: 'beach-sunset.jpg'
+    fileName: 'Holding Beans'
   },
   {
     id: '8',
@@ -86,7 +86,7 @@ const initialMockImages: GalleryImage[] = [
     image_c: '/image_ex8_c.jpeg',
     uploadDate: new Date(2023, 7, 30),
     modelUsed: 'VGG16',
-    fileName: 'desert-dunes.png'
+    fileName: 'Chill Guy outside BB'
   },
   {
     id: '9',
@@ -94,7 +94,7 @@ const initialMockImages: GalleryImage[] = [
     image_c: '/image_ex9_c.jpeg',
     uploadDate: new Date(2023, 8, 15),
     modelUsed: 'VGG16 (Quantized)',
-    fileName: 'night-sky.jpeg'
+    fileName: 'Beans being transported'
   }     
 ];
 
