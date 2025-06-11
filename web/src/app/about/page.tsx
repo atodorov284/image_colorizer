@@ -29,7 +29,7 @@ const AboutPage: React.FC = () => {
     {
       name: 'Mika Umaña',
       image: '/Mika.jpeg',
-      bio: 'AI student at the University of Groningen and co-founder of ChromaFlow.',
+      bio: 'Expert Front End Engineer, AI student at the University of Groningen and co-founder of ChromaFlow.',
       socials: { linkedin: 'https://www.linkedin.com/in/mika-umaña-lemus-76a485260', github: 'https://github.com/MikaMann' }
     },
     {
@@ -52,7 +52,8 @@ const AboutPage: React.FC = () => {
     { name: 'Next.js', category: 'Full-stack Framework', icon: '▲', color: 'bg-gradient-to-br from-gray-700 to-gray-900' },
     { name: 'Tailwind', category: 'CSS Framework', icon: '🎨', color: 'bg-gradient-to-br from-green-400 to-blue-500' },
     { name: 'Docker', category: 'Containerization', icon: '🐳', color: 'bg-gradient-to-br from-blue-500 to-cyan-700' },
-    { name: 'TypeScript', category: 'Programming Language', icon: '📘', color: 'bg-gradient-to-br from-orange-600 to-blue-800' }
+    { name: 'TypeScript', category: 'Web Language', icon: '📘', color: 'bg-gradient-to-br from-orange-600 to-blue-800' },
+    { name: 'FastAPI', category: 'API Framework', icon: '🚀', color: 'bg-gradient-to-br from-green-500 to-blue-600' }
   ];
 
   return (
@@ -188,7 +189,7 @@ const AboutPage: React.FC = () => {
                 <h2 className="text-5xl font-bold mb-20 text-center">
                   Technology We <span className="gradient-text">Use</span>
                 </h2>
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6 max-w-6xl mx-auto">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-6 max-w-6xl mx-auto">
                     {techStack.map((tech, index) => (
                         <div key={tech.name} className="glass-card p-6 rounded-2xl hover-glow transition-all duration-300 transform hover:-translate-y-2 text-center group">
                             <div className={`${tech.color} w-16 h-16 rounded-xl flex items-center justify-center mx-auto mb-4 text-2xl shadow-lg group-hover:scale-110 transition-transform duration-300`}>
