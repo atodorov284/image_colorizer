@@ -163,6 +163,7 @@ class VGGPipeline(BasePipeline):
             self.optimizer.zero_grad()
             ab_pred = self.model(lll_inputs)
 
+            # Compute per-pixel L1 loss
             per_pixel_loss = self.criterion(ab_pred, ab_targets_continuous)
 
             # Get ab class indices for each pixel

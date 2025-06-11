@@ -1,6 +1,6 @@
 data:
   train_dir: ./data/train2017
-  val_dir: ./data/val2017
+  val_dir: ./data/fake_val2017
   train_captions_dir: ./data/annotations/captions_train2017.json
   val_captions_dir: ./data/annotations/captions_val2017.json
   train_cache_path: ./data/train_filtered.json
@@ -14,8 +14,8 @@ model:
   pretrained: True
 
 training:
-  batch_size: 2
-  learning_rate: 0.001
+  batch_size: 1
+  learning_rate: 0.000001
   num_epochs: 1
   patience: 10
   min_delta: 0.00001
