@@ -7,7 +7,7 @@ RUN apt-get update -y \
  && rm -rf /var/lib/apt/lists/*
 
 RUN corepack enable \
- && corepack prepare pnpm@latest --activate
+ && corepack use pnpm@latest-10
 
 WORKDIR /app/web
 COPY web/pnpm-lock.yaml web/package.json ./

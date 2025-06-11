@@ -23,7 +23,7 @@ const AboutPage: React.FC = () => {
     {
       name: 'Sven van Loon',
       image: '/Sven.jpg',
-      bio: 'Future Google ML engineer, Specializing in API development and machine learning, with a focus on image processing.',
+      bio: 'Professional Docker Engineer and AI student at the University of Groningen. Co-founder of ChromaFlow.',
       socials: { linkedin: 'https://www.linkedin.com/in/sven-van-loon-750373338/', github: 'https://github.com/svens0n58' }
     },
     {
