@@ -27,7 +27,7 @@ const initialMockImages: GalleryImage[] = [
   {
     id: '1',
     image_o: '/image_ex1_o.jpeg',
-    image_c: '/image_ex1_o.jpeg',
+    image_c: '/image_ex1_c.jpeg',
     uploadDate: new Date(2023, 0, 15),
     modelUsed: 'ResNet18',
     fileName: 'vintage-portrait.jpg'
@@ -35,7 +35,7 @@ const initialMockImages: GalleryImage[] = [
   {
     id: '2',
     image_o: '/image_ex2_o.jpeg',
-    image_c: '/image_ex2_o.jpeg',
+    image_c: '/image_ex2_c.jpeg',
     uploadDate: new Date(2023, 1, 20),
     modelUsed: 'VGG16',
     fileName: 'mountain-scene.png'
@@ -43,7 +43,7 @@ const initialMockImages: GalleryImage[] = [
   {
     id: '3',
     image_o: '/image_ex3_o.jpeg',
-    image_c: '/image_ex3_o.jpeg',
+    image_c: '/image_ex3_c.jpeg',
     uploadDate: new Date(2023, 2, 10),
     modelUsed: 'VGG16 (Quantized)',
     fileName: 'quick-shot.jpeg'
@@ -51,7 +51,7 @@ const initialMockImages: GalleryImage[] = [
   {
     id: '4',
     image_o: '/image_ex4_o.jpeg',
-    image_c: '/image_ex4_o.jpeg',
+    image_c: '/image_ex4_c.jpeg',
     uploadDate: new Date(2023, 3, 5),
     modelUsed: 'ResNet18',
     fileName: 'building-facade.jpg'
@@ -59,7 +59,7 @@ const initialMockImages: GalleryImage[] = [
   {
     id: '5',
     image_o: '/image_ex5_o.jpeg',
-    image_c: '/image_ex5_o.jpeg',
+    image_c: '/image_ex5_c.jpeg',
     uploadDate: new Date(2023, 4, 12),
     modelUsed: 'VGG16',
     fileName: 'forest-path.png'
@@ -67,7 +67,7 @@ const initialMockImages: GalleryImage[] = [
   {
     id: '6',
     image_o: '/image_ex6_o.jpeg',
-    image_c: '/image_ex6_o.jpeg',
+    image_c: '/image_ex6_c.jpeg',
     uploadDate: new Date(2023, 5, 18),
     modelUsed: 'VGG16 (Quantized)',
     fileName: 'cityscape.jpeg'
@@ -75,7 +75,7 @@ const initialMockImages: GalleryImage[] = [
   {
     id: '7',
     image_o: '/image_ex7_o.jpeg',
-    image_c: '/image_ex7_o.jpeg',
+    image_c: '/image_ex7_c.jpeg',
     uploadDate: new Date(2023, 6, 22),
     modelUsed: 'ResNet18',
     fileName: 'beach-sunset.jpg'
@@ -83,7 +83,7 @@ const initialMockImages: GalleryImage[] = [
   {
     id: '8',
     image_o: '/image_ex8_o.jpeg',
-    image_c: '/image_ex8_o.jpeg',
+    image_c: '/image_ex8_c.jpeg',
     uploadDate: new Date(2023, 7, 30),
     modelUsed: 'VGG16',
     fileName: 'desert-dunes.png'
@@ -91,7 +91,7 @@ const initialMockImages: GalleryImage[] = [
   {
     id: '9',
     image_o: '/image_ex9_o.jpeg',
-    image_c: '/image_ex9_o.jpeg',
+    image_c: '/image_ex9_c.jpeg',
     uploadDate: new Date(2023, 8, 15),
     modelUsed: 'VGG16 (Quantized)',
     fileName: 'night-sky.jpeg'
