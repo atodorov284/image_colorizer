@@ -52,6 +52,7 @@ Transform black and white images into vibrant, colorized versions using state-of
 
 #### Option 1: Docker (Recommended)
 ```bash
+docker-compose -f docker-compose.dev.yml build
 docker-compose -f docker-compose.dev.yml up
 ```
 
