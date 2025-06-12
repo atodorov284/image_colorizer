@@ -38,7 +38,9 @@ class PredictingUtils:
         )
         l_resized_tensor = l_resized_tensor.to(device)
         ab_predicted = model(l_resized_tensor).cpu()
-        colorized_img = PredictingUtils.postprocess_tens(l_orig_tensor, ab_predicted)
+        colorized_img = PredictingUtils.reconstruct_original_size(
+            l_orig_tensor, ab_predicted
+        )
         return colorized_img
 
     @staticmethod
@@ -71,7 +73,7 @@ class PredictingUtils:
             input_image, target_hw=(256, 256)
         )
         predicted_ab *= ColorizationUtils.AB_SCALE
-        colorized_img = PredictingUtils.postprocess_tens(
+        colorized_img = PredictingUtils.reconstruct_original_size(
             l_orig_tensor, predicted_ab.unsqueeze(0)
         )
 
@@ -170,7 +172,7 @@ class PredictingUtils:
         return l_orig_tensor, l_resized_tensor
 
     @staticmethod
-    def postprocess_tens(
+    def reconstruct_original_size(
         l_orig_tensor: torch.Tensor, ab_predicted: torch.Tensor, mode: str = "bilinear"
     ) -> np.ndarray:
         """
