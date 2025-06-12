@@ -16,6 +16,7 @@ def make_conv_relu_bn_block(
     dilation: int = 1,
     bias: bool = True,
 ) -> nn.Sequential:
+    """Helper function to create a convolutional block with ReLU and BatchNorm."""
     layers = nn.ModuleList()
     for i in range(n):
         layers.append(
@@ -35,7 +36,13 @@ def make_conv_relu_bn_block(
 
 
 class VGGColorizationModel(BaseColorizationModel):
-    def __init__(self, pretrained: bool = True):
+    def __init__(self, pretrained: bool = True) -> None:
+        """
+        Constructor for the VGGColorizationModel class.
+
+        Args:
+            pretrained (bool, optional): Whether to use pretrained weights. Defaults to True.
+        """
         super().__init__()
 
         self.feature_blocks = nn.ModuleList(
@@ -173,6 +180,16 @@ class VGGColorizationModel(BaseColorizationModel):
                             )
 
     def forward(self, x_lll: torch.Tensor) -> torch.Tensor:
+        """
+        Forward pass for the colorization model.
+
+        Args:
+            x_lll (torch.Tensor): Input tensor (e.g., L channel or LLL).
+                                  Shape typically [Batch, Channels, H, W].
+
+        Returns:
+            torch.Tensor: Predicted AB channels tensor. Shape [Batch, 2, H, W].
+        """
         x = x_lll[:, :1, :, :]
         x = ColorizationUtils.normalize_l_channel(x)
         for block in self.feature_blocks:

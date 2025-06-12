@@ -6,7 +6,6 @@ import skimage.color as color
 import torch
 import torch.nn.functional as F
 from PIL import Image
-from skimage.color import lab2rgb
 
 from utils.colorization_utils import ColorizationUtils
 
@@ -45,7 +44,10 @@ class PredictingUtils:
     @staticmethod
     @torch.no_grad()
     def predict_resnet(
-        model, device, input_image: Image.Image, input_size: Tuple[int, int]
+        model: torch.nn.Module,
+        device: torch.device,
+        input_image: Image.Image,
+        input_size: Tuple[int, int],
     ) -> np.ndarray:
         """
         Predicts AB channels for a single LLL input tensor.

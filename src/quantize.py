@@ -8,7 +8,9 @@ import yaml
 from models.vgg import VGGColorizationModel
 
 
-def print_model_size(model, label="", path="temp_model.pth"):
+def print_model_size(
+    model: torch.nn.Module, label: str = "", path: str = "temp_model.pth"
+) -> None:
     """Helper function to print model size."""
     torch.save(model, path)
     size = os.path.getsize(path)
@@ -48,7 +50,6 @@ if __name__ == "__main__":
 
     print("Loaded float model for quantization.")
 
-    # --- 2. Apply Dynamic Quantization ---
     print("Applying dynamic quantization (no calibration needed)...")
 
     # Specify which layer types to quantize dynamically.
@@ -63,7 +64,6 @@ if __name__ == "__main__":
         float_model, layers_to_quantize, dtype=torch.qint8
     )
 
-    # --- 3. Save and Verify ---
     # For dynamic quantization, we save the entire model object, not just the state_dict.
     quantized_model_path = (
         f"{config['output']['best_model_dir']}/best_model_dynamic_int8.pth"

@@ -1,13 +1,11 @@
 import os
-import warnings
-from typing import Dict, Optional, Tuple
+from typing import Optional, Tuple
 
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
 import yaml
 from PIL import Image
-from torchvision import transforms
 from tqdm import tqdm
 
 from models.resnet import ResNetColorizationModel
@@ -19,7 +17,8 @@ from utils.predicting_utils import PredictingUtils
 class ModelComparison:
     """Class to handle multi-model colorization comparison."""
 
-    def __init__(self, device: str):
+    def __init__(self, device: str) -> None:
+        """Initialize the ModelComparison class."""
         self.device = device
         self.models = {}
         self.configs = {}
@@ -85,7 +84,7 @@ class ModelComparison:
         image_path: str,
         output_dir: str,
         target_size: Tuple[int, int] = (256, 256),
-    ):
+    ) -> None:
         """Compare all loaded models on a single image."""
         pil_input = Image.open(image_path).convert("RGB")
 
@@ -168,7 +167,8 @@ class ModelComparison:
         return mse_scores
 
 
-def main():
+def main() -> None:
+    """Main function."""
     device = (
         "mps"
         if torch.backends.mps.is_available()

@@ -11,3 +11,4 @@ outputs/
 *.png
 *.jpeg
 !web/public/*.jpeg
+demo/

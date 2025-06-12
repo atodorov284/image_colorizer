@@ -6,7 +6,8 @@ from models.vgg import VGGColorizationModel
 from pipelines.colorization_pipeline import ColorizationPipeline
 
 
-def main():
+def main() -> None:
+    """Main training function."""
     # Load config
     with open("src/configs/vgg_config.yaml", "r") as file:
         config = yaml.safe_load(file)

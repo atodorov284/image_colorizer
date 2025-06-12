@@ -55,7 +55,8 @@ class ColorizationDataset(Dataset):
             )
         print(f"Cache saved to {self.cache_path} for future runs.")
 
-    def _build_filelist(self, captions_dir):
+    def _build_filelist(self, captions_dir: str) -> list[str]:
+        """Builds a list of image file names."""
         all_image_files: list[str] = [
             f
             for f in os.listdir(self.root_dir)
@@ -74,7 +75,8 @@ class ColorizationDataset(Dataset):
         print(f"Filtered {len(all_image_files) - len(kept)} images.")
         return kept
 
-    def _fingerprint(self):
+    def _fingerprint(self) -> str:
+        """Returns a fingerprint of the dataset."""
         md5 = hashlib.md5()
         for name in sorted(
             f

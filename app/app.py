@@ -2,7 +2,7 @@ import io
 import os
 import sys
 from pathlib import Path
-from typing import Any, Optional, Tuple, Union
+from typing import Any, Tuple, Union
 
 # Add the project root to the path before other imports
 sys.path.insert(0, str(Path(__file__).parent))
@@ -11,20 +11,18 @@ src_path = os.path.join(Path(__file__).parent.parent, "src")
 sys.path.insert(0, src_path)
 
 # Standard imports
-import matplotlib.pyplot as plt
-import numpy as np
-import streamlit as st
-import torch
-from PIL import Image
-import io
-import base64
-import streamlit as st
-import streamlit.components.v1 as components
+import base64  # noqa: E402
+
+import numpy as np  # noqa: E402
+import streamlit as st  # noqa: E402
+import streamlit.components.v1 as components  # noqa: E402
+import torch  # noqa: E402
+from PIL import Image  # noqa: E402
 
 # Import our app modules
-from app.model_loader import get_available_models, load_model
-from app.utils import get_example_images, save_uploaded_image
-from src.utils.colorization_utils import ColorizationUtils
+from app.model_loader import get_available_models, load_model  # noqa: E402
+from app.utils import get_example_images  # noqa: E402
+from src.utils.colorization_utils import ColorizationUtils  # noqa: E402
 
 # Page configuration
 st.set_page_config(
@@ -34,22 +32,24 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-def create_comparison_slider(original_img, colorized_img, height=400):
+
+def create_comparison_slider(
+    original_img: Image.Image, colorized_img: Image.Image, height: int = 400
+) -> None:
     """Create a slider for comparing before/after images using streamlit components.
-    
+
     Args:
         original_img: Original PIL image (grayscale)
         colorized_img: Colorized PIL image
         height: Height of the comparison widget in pixels
-        
+
     Returns:
         None - directly renders the component
     """
-    import base64
     import io
-    
+
     # Ensure images are the same size, original_img is used as reference
-    width, _ = original_img.size 
+    width, _ = original_img.size
     # If colorized_img has a different size, resize it to match original_img.
     # This assumes original_img and colorized_img should be aligned.
     if colorized_img.size != original_img.size:
@@ -59,10 +59,10 @@ def create_comparison_slider(original_img, colorized_img, height=400):
     colorized_bytes = io.BytesIO()
     original_img.save(orig_bytes, format="PNG")
     colorized_img.save(colorized_bytes, format="PNG")
-    
+
     orig_base64 = base64.b64encode(orig_bytes.getvalue()).decode()
     colorized_base64 = base64.b64encode(colorized_bytes.getvalue()).decode()
-    
+
     # Unique ID for elements to avoid conflicts if multiple sliders are on a page
     component_id = f"comparison-slider-{int(np.random.rand() * 1000000)}"
 
@@ -146,6 +146,8 @@ def create_comparison_slider(original_img, colorized_img, height=400):
     </script>
     """
     components.html(html_code, height=height + 70)
+
+
 # Custom CSS for styling
 st.markdown(
     """
@@ -452,10 +454,12 @@ if image is not None:
         )
 
         colorized_image = Image.fromarray((colorized_image_np * 255).astype(np.uint8))
-    
+
     # Directly call the function to render the slider
     st.markdown("<h3>Drag to Compare Before/After</h3>", unsafe_allow_html=True)
-    create_comparison_slider(grayscale_image, colorized_image) # This will now render the slider
+    create_comparison_slider(
+        grayscale_image, colorized_image
+    )  # This will now render the slider
 
     # Display images in a row with titles
     col1, col2, col3 = st.columns(3)

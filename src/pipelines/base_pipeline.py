@@ -1,9 +1,8 @@
+import os
 from abc import ABC, abstractmethod
 
 import torch
 import torch.nn as nn
-
-import os
 
 
 class BasePipeline(ABC):
@@ -23,7 +22,7 @@ class BasePipeline(ABC):
         self.config = config
         self.model = model.to(device)
         self.device = device
-        
+
         # Common setup
         self.checkpoint_dir = self.config["output"]["checkpoint_dir"]
         os.makedirs(self.checkpoint_dir, exist_ok=True)

@@ -1,6 +1,5 @@
 import io
 from enum import Enum
-from typing import Literal
 
 import PIL
 from fastapi import FastAPI, HTTPException, UploadFile
@@ -8,8 +7,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse, StreamingResponse
 from PIL import Image, ImageOps
 
-from .model_hub import ModelHub
 from utils.colorization_utils import ColorizationUtils
+
+from .model_hub import ModelHub
 
 
 class ModelType(str, Enum):
@@ -133,7 +133,8 @@ app.add_middleware(
 
 
 @app.get("/", description="Root endpoint that redirects to API documentation.")
-async def root():
+async def root() -> RedirectResponse:
+    """Root endpoint that redirects to API documentation."""
     return RedirectResponse(url="/docs")
 
 
@@ -180,7 +181,7 @@ async def root():
         },
     },
 )
-async def predict(model: ModelType, image: UploadFile):
+async def predict(model: ModelType, image: UploadFile) -> StreamingResponse:
     """
     Colorize a grayscale image using the specified model.
 
@@ -220,7 +221,8 @@ async def predict(model: ModelType, image: UploadFile):
     return StreamingResponse(buffer, media_type="image/png")
 
 
-@app.post("/preview", 
+@app.post(
+    "/preview",
     summary="Get grayscale preview",
     description="Returns the grayscale version of the input",
     responses={
@@ -236,7 +238,7 @@ async def predict(model: ModelType, image: UploadFile):
         },
     },
 )
-async def preview(image: UploadFile):
+async def preview(image: UploadFile) -> StreamingResponse:
     """Generate grayscale preview using the same preprocessing as the model."""
     try:
         image.file.seek(0)
@@ -245,18 +247,20 @@ async def preview(image: UploadFile):
         pil_img = pil_img.convert("RGB")
 
         # Use the same preprocessing as the model
-        lll, _ = ColorizationUtils.preprocess_image(pil_img, (pil_img.size[1], pil_img.size[0]))
-        
+        lll, _ = ColorizationUtils.preprocess_image(
+            pil_img, (pil_img.size[1], pil_img.size[0])
+        )
+
         # Convert the L channel back to grayscale image
-        gray_img = Image.fromarray((lll[0].numpy() * 255).astype('uint8'))
+        gray_img = Image.fromarray((lll[0].numpy() * 255).astype("uint8"))
 
         # Return the preview image
         buffer = io.BytesIO()
         gray_img.save(buffer, format="PNG")
         buffer.seek(0)
-        
+
         return StreamingResponse(buffer, media_type="image/png")
-        
+
     except PIL.UnidentifiedImageError:
         raise HTTPException(
             status_code=415,

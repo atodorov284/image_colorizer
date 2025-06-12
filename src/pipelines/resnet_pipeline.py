@@ -17,8 +17,9 @@ import os
 
 class ResNetPipeline(BasePipeline):
     """Pipeline for ResNet-based colorization models."""
-    
-    def __init__(self, config: dict, model: nn.Module, device: torch.device):
+
+    def __init__(self, config: dict, model: nn.Module, device: torch.device) -> None:
+        """Initialize the ResNet pipeline."""
         super().__init__(config, model, device)
 
         if torch.cuda.is_available():
@@ -29,11 +30,11 @@ class ResNetPipeline(BasePipeline):
 
         self.early_stopping = EarlyStopping(
             patience=self.config["training"]["patience"],
-            min_delta=self.config["training"]["min_delta"]
+            min_delta=self.config["training"]["min_delta"],
         )
         self.setup_loaders()
         self.setup_optimizer_criterion()
-    
+
     def setup_loaders(self) -> None:
         """Setup data loaders for ResNet training."""
         # Training dataset
@@ -41,15 +42,15 @@ class ResNetPipeline(BasePipeline):
             root_dir=self.config["data"]["train_dir"],
             captions_dir=self.config["data"]["train_captions_dir"],
             target_size=tuple(self.config["data"]["image_size"]),
-            cache_path=self.config["data"]["train_cache_path"]
+            cache_path=self.config["data"]["train_cache_path"],
         )
-        
+
         # Validation dataset
         val_dataset = ColorizationDataset(
             root_dir=self.config["data"]["val_dir"],
             captions_dir=self.config["data"]["val_captions_dir"],
             target_size=tuple(self.config["data"]["image_size"]),
-            cache_path=self.config["data"]["val_cache_path"]
+            cache_path=self.config["data"]["val_cache_path"],
         )
 
         # Optional subset
@@ -58,7 +59,9 @@ class ResNetPipeline(BasePipeline):
             num_samples = int(len(train_dataset) * subset_percent)
             indices = np.random.choice(len(train_dataset), num_samples, replace=False)
             train_dataset = Subset(train_dataset, indices)
-            print(f"Using {num_samples} samples ({subset_percent*100:.1f}%) from training dataset.")
+            print(
+                f"Using {num_samples} samples ({subset_percent * 100:.1f}%) from training dataset."
+            )
 
         self.train_loader = DataLoader(
             train_dataset,
@@ -66,7 +69,7 @@ class ResNetPipeline(BasePipeline):
             shuffle=True,
             num_workers=self.num_workers,
             pin_memory=True,
-            persistent_workers=True
+            persistent_workers=True,
         )
         self.val_loader = DataLoader(
             val_dataset,
@@ -74,7 +77,7 @@ class ResNetPipeline(BasePipeline):
             shuffle=False,
             num_workers=self.num_workers,
             pin_memory=True,
-            persistent_workers=True
+            persistent_workers=True,
         )
 
         print(f"ResNet Pipeline - Train: {len(train_dataset)}, Val: {len(val_dataset)}")
@@ -83,8 +86,7 @@ class ResNetPipeline(BasePipeline):
         """Setup optimizer and loss criterion for ResNet."""
         self.criterion = nn.MSELoss()
         self.optimizer = optim.Adam(
-            self.model.parameters(), 
-            lr=self.config["training"]["learning_rate"]
+            self.model.parameters(), lr=self.config["training"]["learning_rate"]
         )
         print("ResNet Pipeline - Using Adam optimizer and MSE loss")
 
@@ -93,17 +95,19 @@ class ResNetPipeline(BasePipeline):
         self.model.train()
         epoch_loss = 0.0
         num_batches = 0
-        
-        progress_bar = tqdm(self.train_loader, desc=f"ResNet Epoch {epoch_num}", leave=False)
+
+        progress_bar = tqdm(
+            self.train_loader, desc=f"ResNet Epoch {epoch_num}", leave=False
+        )
         for inputs, targets in progress_bar:
             inputs, targets = inputs.to(self.device), targets.to(self.device)
-            
+
             self.optimizer.zero_grad()
             outputs = self.model(inputs)
             loss = self.criterion(outputs, targets)
             loss.backward()
             self.optimizer.step()
-            
+
             epoch_loss += loss.item()
             num_batches += 1
             progress_bar.set_postfix(loss=loss.item())
@@ -118,7 +122,9 @@ class ResNetPipeline(BasePipeline):
         num_batches = 0
 
         with torch.no_grad():
-            for inputs, targets in tqdm(self.val_loader, desc="ResNet Eval", leave=False):
+            for inputs, targets in tqdm(
+                self.val_loader, desc="ResNet Eval", leave=False
+            ):
                 inputs, targets = inputs.to(self.device), targets.to(self.device)
                 outputs = self.model(inputs)
                 loss = self.criterion(outputs, targets)
@@ -136,27 +142,29 @@ class ResNetPipeline(BasePipeline):
 
         start_time = datetime.now()
         best_val_loss = float("inf")
-        
+
         for epoch in range(1, num_epochs + 1):
             train_loss = self.train_epoch(epoch)
             val_loss = self.evaluate()
-            
-            print(f"ResNet Epoch {epoch}: Train Loss={train_loss:.6f}, Val Loss={val_loss:.6f}")
-            
+
+            print(
+                f"ResNet Epoch {epoch}: Train Loss={train_loss:.6f}, Val Loss={val_loss:.6f}"
+            )
+
             # Save checkpoint
             end_time = datetime.now()
             checkpoint = {
-                'epoch': epoch,
-                'model_state_dict': self.model.state_dict(),
-                'optimizer_state_dict': self.optimizer.state_dict(),
-                'train_loss': train_loss,
-                'val_loss': val_loss,
-                'wall_time': (end_time - start_time).total_seconds()
+                "epoch": epoch,
+                "model_state_dict": self.model.state_dict(),
+                "optimizer_state_dict": self.optimizer.state_dict(),
+                "train_loss": train_loss,
+                "val_loss": val_loss,
+                "wall_time": (end_time - start_time).total_seconds(),
             }
             ckpt_name = f"{model_name}_epoch_{epoch:03d}.pth"
             ckpt_path = os.path.join(self.checkpoint_dir, ckpt_name)
             torch.save(checkpoint, ckpt_path)
-            
+
             # Save best model
             if val_loss < best_val_loss:
                 best_val_loss = val_loss
@@ -168,7 +176,9 @@ class ResNetPipeline(BasePipeline):
                 print(f"ResNet early stopping at epoch {epoch}")
                 if self.early_stopping.best_state:
                     self.model.load_state_dict(self.early_stopping.best_state)
-                    best_early_model_path = os.path.join(self.best_model_dir, "best_model_earlystop.pth")
+                    best_early_model_path = os.path.join(
+                        self.best_model_dir, "best_model_earlystop.pth"
+                    )
                     torch.save(self.model.state_dict(), best_early_model_path)
                 break
 

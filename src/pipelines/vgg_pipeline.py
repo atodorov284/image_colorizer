@@ -21,7 +21,8 @@ from utils.predicting_utils import PredictingUtils
 class VGGPipeline(BasePipeline):
     """Pipeline for VGG-based colorization with rebalancing weights."""
 
-    def __init__(self, config: dict, model: nn.Module, device: torch.device):
+    def __init__(self, config: dict, model: nn.Module, device: torch.device) -> None:
+        """Initialize the VGG pipeline."""
         super().__init__(config, model, device)
 
         # VGG-specific setup
@@ -224,7 +225,12 @@ class VGGPipeline(BasePipeline):
         avg_loss = total_loss / num_batches if num_batches > 0 else 0.0
         return avg_loss
 
-    def visualize_batch(self, lll_inputs, ab_targets_continuous, ab_pred):
+    def visualize_batch(
+        self,
+        lll_inputs: torch.Tensor,
+        ab_targets_continuous: torch.Tensor,
+        ab_pred: torch.Tensor,
+    ) -> None:
         """Visualize a batch of predictions."""
         for i in range(min(lll_inputs.size(0), 5)):
             l_input = lll_inputs[i].cpu()

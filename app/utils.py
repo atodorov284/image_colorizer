@@ -4,11 +4,9 @@ import os
 from pathlib import Path
 from typing import Any, List, Optional, Tuple, Union
 
-import matplotlib.pyplot as plt
 import numpy as np
-import torch
 from matplotlib.figure import Figure
-from PIL import Image, ImageOps
+from PIL import Image
 
 
 def get_example_images(directory_path: Union[str, Path], limit: int = 5) -> List[Path]:

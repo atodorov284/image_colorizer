@@ -1,26 +1,19 @@
 import argparse
 import os
-import sys
 import time
-import warnings
 
 import numpy as np
 import psutil  # Import psutil
 import torch
-import torch.nn.functional as F
 import yaml
-from matplotlib import pyplot as plt
 from PIL import Image
 from tqdm import tqdm
 
-from models.resnet import ResNetColorizationModel
 from models.vgg import VGGColorizationModel
-from models.vit import ViTColorizationModel
-from utils.colorization_utils import ColorizationUtils
 from utils.predicting_utils import PredictingUtils
 
 
-def get_memory_usage_mb():
+def get_memory_usage_mb() -> float:
     """Returns the memory usage of the current process in MB."""
     process = psutil.Process(os.getpid())
     return process.memory_info().rss / (1024 * 1024)
