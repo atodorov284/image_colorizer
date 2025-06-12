@@ -15,7 +15,7 @@ Transform black and white images into vibrant, colorized versions using state-of
 
 ### Prerequisites
 
-- Python 3.12+
+- Python 3.10+
 - Node.js 20+
 - Docker (optional)
 - Git LFS (for model weights)
@@ -280,7 +280,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## 👥 Team
 
-- **Alexander Todorov** - Teaching Assistant & Student at UG
+- **Aleksandar Todorov** - Teaching Assistant & Student at UG
 - **Sven van Loon** - Docker Engineer & AI Student at UvA
 - **Mika Umaña** - Front End Engineer & AI Student at UG
 - **Christian Kobriger** - Data Science Student at ETH Zürich
