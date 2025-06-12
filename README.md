@@ -58,7 +58,7 @@ docker-compose -f docker-compose.dev.yml up
 
 Visit `http://localhost:3000` to access the application.
 
-#### Option 2: Manual Setup
+#### Option 2: Manual Setup (in two separate terminals)
 ```bash
 # Terminal 1: Start the API server
 cd src
