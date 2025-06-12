@@ -82,14 +82,14 @@ Visit `http://localhost:3000` to access the application.
 
 ### Technical Details
 
-- **Input Processing**: Images converted to LAB color space, L channel used as input
+- **Input Processing**: Images converted to LAB color space, L channel used as input and A and B as targets
 - **Output**: Predicted AB channels combined with original L channel
 - **Color Space**: LAB color space for perceptually uniform colorization
 - **Rebalancing**: Quantile-based weight rebalancing to handle color distribution bias
 - **Quantization**: Dynamic INT8 quantization for 4x model size reduction
 
 
-### Colorization Performance
+## 🖼️ Results Showcase
 | Original (Grayscale) | ResNet18 | VGG16 | VGG16 (Quantized) |
 |:---:|:---:|:---:|:---:|
 | ![Original](web/public/image_ex6_o.jpeg) | ![ResNet Result](web/public/image_ex6_c.jpeg) | ![VGG Result](web/public/image_ex6_c.jpeg) | ![Quantized Result](web/public/image_ex6_c.jpeg) |
@@ -141,20 +141,95 @@ curl -X POST "http://localhost:8000/predict?model=vgg" \
 ## 📁 Project Structure
 
 ```
-├── src/                    # Python source code
-│   ├── api/               # FastAPI application
-│   ├── models/            # Model architectures
-│   ├── pipelines/         # Training pipelines
-│   ├── utils/             # Utility functions
-│   └── configs/           # Model configurations
-├── web/                   # React frontend
-│   ├── src/components/    # React components
-│   ├── src/app/          # Next.js pages
-│   └── public/           # Static assets
-├── app/                   # Streamlit application
-├── resnet/best_model/     # ResNet model weights
-├── vgg/best_model/        # VGG model weights
-└── docker-compose.dev.yml # Development setup
+├── .env                        # Environment variables
+├── .gitattributes             # Git LFS configuration
+├── .gitignore                 # Git ignore rules
+├── .python-version            # Python version specification
+├── Dockerfile                 # Main Docker configuration
+├── Dockerfile.api             # API-specific Docker configuration
+├── Dockerfile.web             # Web frontend Docker configuration
+├── docker-compose.dev.yml     # Development Docker Compose
+├── pyproject.toml             # Python project configuration & dependencies
+├── uv.lock                    # UV dependency lock file
+│
+├── src/                       # Python source code
+│   ├── api/                   # FastAPI application
+│   │   ├── __init__.py
+│   │   ├── front_end.py
+│   │   ├── main.py           # FastAPI main application
+│   │   └── model_hub.py      # Model loading and management
+│   ├── configs/              # Model configurations
+│   │   ├── resnet_config.yaml
+│   │   └── vgg_config.yaml
+│   ├── dataloaders/          # Data loading utilities
+│   │   ├── __init__.py
+│   │   └── colorization_dataset.py
+│   ├── models/               # Model architectures
+│   │   ├── __init__.py
+│   │   ├── base_model.py     # Abstract base model
+│   │   ├── resnet.py         # ResNet implementation
+│   │   └── vgg.py            # VGG implementation
+│   ├── pipelines/            # Training pipelines
+│   │   ├── __init__.py
+│   │   ├── base_pipeline.py
+│   │   ├── colorization_pipeline.py
+│   │   ├── resnet_pipeline.py
+│   │   └── vgg_pipeline.py
+│   ├── utils/                # Utility functions
+│   │   ├── __init__.py
+│   │   ├── colorization_utils.py
+│   │   ├── early_stopping.py
+│   │   ├── filtering_utils.py
+│   │   └── predicting_utils.py
+│   ├── predict_compare.py    # Model comparison script
+│   ├── quant_predict.py      # Quantized model prediction
+│   ├── quantize.py           # Model quantization script
+│   └── train.py              # Training script
+│
+├── app/                       # Streamlit application
+│   ├── __init__.py
+│   ├── app.py                # Main Streamlit app
+│   ├── model_loader.py       # Model loading for Streamlit
+│   └── utils.py              # Streamlit utilities
+│
+├── web/                       # React/Next.js frontend
+│   ├── .gitignore
+│   ├── next.config.ts
+│   ├── package.json
+│   ├── pnpm-lock.yaml
+│   ├── pnpm-workspace.yaml
+│   ├── postcss.config.mjs
+│   ├── tsconfig.json
+│   ├── public/               # Static assets & example images
+│   │   ├── Alex.jpg
+│   │   ├── Chirs.jpeg
+│   │   ├── Mika.jpeg
+│   │   ├── Sven.jpg
+│   │   ├── image_ex1_c.jpeg  # Example colorized images
+│   │   ├── image_ex1_o.jpeg  # Example original images
+│   │   └── ... (more examples)
+│   └── src/
+│       ├── app/
+│       │   ├── about/
+│       │   │   └── page.tsx  # About page
+│       │   ├── gallery/
+│       │   │   └── page.tsx  # Gallery page
+│       │   ├── globals.css
+│       │   ├── layout.tsx
+│       │   └── page.tsx      # Home page
+│       ├── components/
+│       │   └── ChromaFlow.tsx # Main component
+│       └── types/
+│           └── globals.d.ts   # TypeScript definitions
+│
+├── resnet/                    # ResNet model artifacts
+│   └── best_model/
+│       └── best_model.pth     # Trained ResNet weights (Git LFS)
+│
+└── vgg/                       # VGG model artifacts
+    └── best_model/
+        ├── best_model.pth     # Trained VGG weights (Git LFS)
+        └── best_model_dynamic_int8.pth # Quantized model (Git LFS)
 ```
 
 ## 🎯 Usage Examples
