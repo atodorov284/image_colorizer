@@ -110,9 +110,9 @@ Visit `http://localhost:3000` to access the application.
 
 | Metric | ResNet18 | VGG16 | VGG16 (Quantized) |
 |--------|----------|-------|-------------------|
-| **Quality Score** | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ |
+| **Quality Score** | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ |
 | **Speed** | 🚄 Fast (0.05s) | 🚂 Medium (0.07s) | 🚄 Fast (0.05s) |
-| **Model Size** | 📦 51MB | 📦📦 129MB | 📦 34MB |
+| **Model Size** | 📦 51MB | 📦📦 129MB | 📦📦 129MB |
 | **Best For** | Quick prototyping | Production quality | Mobile/Edge deployment |
 
 > **💡 Pro Tip**: The VGG16 model generally produces the most vibrant and accurate colorizations, while the quantized version offers the best balance of quality and efficiency for resource-constrained environments.
