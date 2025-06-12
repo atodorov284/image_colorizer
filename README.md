@@ -1,122 +1,286 @@
-# 🎨 Automatic Image Colorization
+# ChromaFlow: AI-Powered Image Colorization
 
-A deep learning project that brings black-and-white photos to life by colorizing them using a ResNet-based neural network. Featuring an interactive web interface, this tool allows you to explore automatic image colorization from your browser.
+Transform black and white images into vibrant, colorized versions using state-of-the-art deep learning models. ChromaFlow is a comprehensive image colorization project that demonstrates different neural network architectures and their effectiveness in bringing historical photos to life.
 
----
+## 🎨 Features
 
-## 🧠 Overview
+- **Multiple Model Architectures**: Compare results from ResNet18, VGG16, and quantized VGG16 models
+- **Interactive Web Interface**: Modern React-based frontend with real-time comparison sliders
+- **RESTful API**: FastAPI backend for seamless model inference
+- **Model Quantization**: Optimized INT8 quantized model for faster inference
+- **Gallery System**: View, download, and share your colorized creations
+- **Dockerized Deployment**: Easy setup with Docker containers
 
-This project uses a convolutional neural network based on **ResNet** to colorize grayscale images. The model predicts the `a` and `b` color channels in the **Lab color space**, given only the lightness (`L`) channel.
+## 🚀 Quick Start
 
----
+### Prerequisites
 
-## ✨ Features
+- Python 3.12+
+- Node.js 20+
+- Docker (optional)
+- Git LFS (for model weights)
 
-- 🖥️ **Interactive Web UI** – Powered by Streamlit for real-time image colorization  
-- 🪞 **Side-by-Side Comparison** – Interactive slider to compare original and colorized images  
-- 🧪 **Multiple Models** – Plug-and-play support for different colorization models (e.g., dummy model, ResNet)  
-- 💾 **Download Results** – Save your colorized images for later use or sharing  
+### Installation
 
----
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/atodorov284/image_colorizer.git
+   cd image_colorizer
+   ```
 
-## ⚙️ Setup & Installation
+2. **Set up the Python environment**
+   ```bash
+   # Using uv (recommended)
+   uv sync
+   ```
 
-### 📦 Step 1: Install `uv` (if not installed)
+3. **Install frontend dependencies**
+   ```bash
+   apt install npm
+   apt install pnpm
+   cd web
+   pnpm install  # or npm install
+   ```
+
+5. **Download model weights**
+   ```bash
+   # Model weights are stored with Git LFS
+   git lfs pull
+   ```
+
+### Running the Application
+
+#### Option 1: Docker (Recommended)
 ```bash
-pip install uv
+docker-compose -f docker-compose.dev.yml up
 ```
 
-### 📥 Step 2: Clone the repository:
+Visit `http://localhost:3000` to access the application.
+
+#### Option 2: Manual Setup
 ```bash
-git clone https://github.com/atodorov284/image_colorizer.git
-cd image_colorizer
+# Terminal 1: Start the API server
+cd src
+uvicorn api.main:app --reload --port 8000
+
+# Terminal 2: Start the frontend
+cd web
+pnpm dev
 ```
 
-### 🔧 Step 3: Install Dependencies
+Visit `http://localhost:3000` to access the application.
+
+## 🏗️ Architecture
+
+### Models
+
+| Model | Architecture | Training Strategy | Use Case |
+|-------|-------------|-------------------|----------|
+| **ResNet18** | ResNet-18 backbone | MSE loss, Adam optimizer | Baseline model, fast inference |
+| **VGG16** | VGG-16 backbone | Weighted L1 loss, rebalancing | Best quality, recommended |
+| **VGG16 (Quantized)** | Dynamically quantized VGG-16 | INT8 quantization | Resource-constrained environments |
+
+### Technical Details
+
+- **Input Processing**: Images converted to LAB color space, L channel used as input and A and B as targets
+- **Output**: Predicted AB channels combined with original L channel
+- **Color Space**: LAB color space for perceptually uniform colorization
+- **Rebalancing**: Quantile-based weight rebalancing to handle color distribution bias
+- **Quantization**: Dynamic INT8 quantization for 4x model size reduction
+
+
+## 🖼️ Results Showcase
+| Original (Grayscale) | ResNet18 | VGG16 | VGG16 (Quantized) |
+|:---:|:---:|:---:|:---:|
+| ![Original](web/public/image_ex6_o.jpeg) | ![ResNet Result](web/public/image_ex6_c.jpeg) | ![VGG Result](web/public/image_ex6_c.jpeg) | ![Quantized Result](web/public/image_ex6_c.jpeg) |
+| *Bean's Headshot* | *Baseline Model* | *Recommended* | *Optimized* |
+
+
+### Model Performance Summary
+
+| Metric | ResNet18 | VGG16 | VGG16 (Quantized) |
+|--------|----------|-------|-------------------|
+| **Quality Score** | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ |
+| **Speed** | 🚄 Fast (0.05s) | 🚂 Medium (0.07s) | 🚄 Fast (0.05s) |
+| **Model Size** | 📦 51MB | 📦📦 129MB | 📦 34MB |
+| **Best For** | Quick prototyping | Production quality | Mobile/Edge deployment |
+
+> **💡 Pro Tip**: The VGG16 model generally produces the most vibrant and accurate colorizations, while the quantized version offers the best balance of quality and efficiency for resource-constrained environments.
+
+
+### Training Statistics
+
+- **Dataset**: COCO 2017 (106K filtered images)
+- **Hardware**: A100 GPU (ResNet), 8x RTX 4090 (VGG)
+- **Training Time**: ~1.3 hours (ResNet), ~13.7 hours (VGG)
+
+## 🛠️ API Documentation
+
+### Endpoints
+
+#### `POST /predict`
+Colorize an image using the specified model.
+
+**Parameters:**
+- `model`: Model type (`resnet`, `vgg`, `quant`)
+- `image`: Image file (JPEG, PNG, BMP)
+
+**Response:** Colorized image as PNG
+
+#### `POST /preview`
+Get grayscale preview of the uploaded image.
+
+**Example:**
 ```bash
-uv sync
+curl -X POST "http://localhost:8000/predict?model=vgg" \
+     -H "Content-Type: multipart/form-data" \
+     -F "image=@path/to/image.jpg" \
+     --output colorized.png
 ```
 
 ## 📁 Project Structure
+
 ```
-image_colorizer/
-├── README.md                           # Project documentation
-├── app/                               # Streamlit web application
+├── .env                        # Environment variables
+├── .gitattributes             # Git LFS configuration
+├── .gitignore                 # Git ignore rules
+├── .python-version            # Python version specification
+├── Dockerfile                 # Main Docker configuration
+├── Dockerfile.api             # API-specific Docker configuration
+├── Dockerfile.web             # Web frontend Docker configuration
+├── docker-compose.dev.yml     # Development Docker Compose
+├── pyproject.toml             # Python project configuration & dependencies
+├── uv.lock                    # UV dependency lock file
+│
+├── src/                       # Python source code
+│   ├── api/                   # FastAPI application
+│   │   ├── __init__.py
+│   │   ├── front_end.py
+│   │   ├── main.py           # FastAPI main application
+│   │   └── model_hub.py      # Model loading and management
+│   ├── configs/              # Model configurations
+│   │   ├── resnet_config.yaml
+│   │   └── vgg_config.yaml
+│   ├── dataloaders/          # Data loading utilities
+│   │   ├── __init__.py
+│   │   └── colorization_dataset.py
+│   ├── models/               # Model architectures
+│   │   ├── __init__.py
+│   │   ├── base_model.py     # Abstract base model
+│   │   ├── resnet.py         # ResNet implementation
+│   │   └── vgg.py            # VGG implementation
+│   ├── pipelines/            # Training pipelines
+│   │   ├── __init__.py
+│   │   ├── base_pipeline.py
+│   │   ├── colorization_pipeline.py
+│   │   ├── resnet_pipeline.py
+│   │   └── vgg_pipeline.py
+│   ├── utils/                # Utility functions
+│   │   ├── __init__.py
+│   │   ├── colorization_utils.py
+│   │   ├── early_stopping.py
+│   │   ├── filtering_utils.py
+│   │   └── predicting_utils.py
+│   ├── predict_compare.py    # Model comparison script
+│   ├── quant_predict.py      # Quantized model prediction
+│   ├── quantize.py           # Model quantization script
+│   └── train.py              # Training script
+│
+├── app/                       # Streamlit application
 │   ├── __init__.py
-│   ├── app.py                         # Main Streamlit UI interface
-│   ├── model_loader.py                # Handles loading trained models
-│   └── utils.py                       # UI utility functions and helpers
-├── notebooks/                         # Jupyter notebooks for analysis
-│   ├── data_analysis.ipynb            # Dataset exploration and statistics
-│   └── filtering.ipynb                # Data preprocessing experiments
-├── pyproject.toml                     # Project dependencies and metadata
-├── src/                              # Core source code
-│   ├── __init__.py
-│   ├── api/                          # API-related modules
-│   │   ├── __init__.py
-│   │   ├── front_end.py              
-│   │   ├── main.py                   # Main API application
-│   │   └── model_hub.py              # Model management and registry
-│   ├── configs/
-│   │   └── resnet_config.yaml        # ResNet model configuration parameters
-│   ├── dataloaders/
-│   │   ├── __init__.py
-│   │   └── colorization_dataset.py   # Dataset loading and preprocessing
-│   ├── models/                       # Neural network architectures
-│   │   ├── __init__.py
-│   │   ├── base_model.py             # Abstract base class for all models
-│   │   ├── resnet.py                 # ResNet-based colorization model
-│   │   └── vit.py              
-│   ├── pipelines/                    # Training and inference workflows
-│   │   ├── __init__.py
-│   │   ├── base_pipeline.py          # Abstract pipeline base class
-│   │   └── colorization_pipeline.py  # Complete colorization workflow
-│   ├── predict.py                    # Standalone prediction script
-│   ├── train.py                      # Model training script
-│   └── utils/                        # Utility functions
-│       ├── __init__.py
-│       ├── colorization_utils.py     # Color space conversion utilities
-│       ├── early_stopping.py        # Training early stopping logic
-│       ├── filtering_utils.py        # Image filtering and preprocessing
-│       └── predicting_utils.py       # Prediction helper functions
-└── uv.lock                           # Locked dependency versions
+│   ├── app.py                # Main Streamlit app
+│   ├── model_loader.py       # Model loading for Streamlit
+│   └── utils.py              # Streamlit utilities
+│
+├── web/                       # React/Next.js frontend
+│   ├── .gitignore
+│   ├── next.config.ts
+│   ├── package.json
+│   ├── pnpm-lock.yaml
+│   ├── pnpm-workspace.yaml
+│   ├── postcss.config.mjs
+│   ├── tsconfig.json
+│   ├── public/               # Static assets & example images
+│   │   ├── Alex.jpg
+│   │   ├── Chirs.jpeg
+│   │   ├── Mika.jpeg
+│   │   ├── Sven.jpg
+│   │   ├── image_ex1_c.jpeg  # Example colorized images
+│   │   ├── image_ex1_o.jpeg  # Example original images
+│   │   └── ... (more examples)
+│   └── src/
+│       ├── app/
+│       │   ├── about/
+│       │   │   └── page.tsx  # About page
+│       │   ├── gallery/
+│       │   │   └── page.tsx  # Gallery page
+│       │   ├── globals.css
+│       │   ├── layout.tsx
+│       │   └── page.tsx      # Home page
+│       ├── components/
+│       │   └── ChromaFlow.tsx # Main component
+│       └── types/
+│           └── globals.d.ts   # TypeScript definitions
+│
+├── resnet/                    # ResNet model artifacts
+│   └── best_model/
+│       └── best_model.pth     # Trained ResNet weights (Git LFS)
+│
+└── vgg/                       # VGG model artifacts
+    └── best_model/
+        ├── best_model.pth     # Trained VGG weights (Git LFS)
+        └── best_model_dynamic_int8.pth # Quantized model (Git LFS)
 ```
 
+## 🎯 Usage Examples
 
-## 🚀 Usage
-### 🖼️ Running the Web Application
+### Web Interface
+1. Visit the application at `http://localhost:3000`
+2. Select your preferred model (VGG16 recommended)
+3. Upload a black and white image
+4. Click "Colorize Image" and wait for processing
+5. Use the comparison slider to see results
+6. Download or share your colorized image
 
-To run the API:
+
+### Command Line Training
 ```bash
+# Train a new model
 cd src
-uvicorn api.main:app --reload
+python train.py --config configs/vgg_config.yaml
+
+# Quantize a trained model
+python quantize.py --config configs/vgg_config.yaml
+
+# Compare multiple models
+python predict_compare.py
 ```
-- Upload an image to predict/resnet
-- Or upload an image to predict/vit (development still in progress)
 
-To start the Streamlit web interface:
-```bash
-streamlit run app/app.py
-```
-This will launch the application in your default browser. You can:
+## 📄 License
 
-- Upload an image to colorize, or use one of the provided example images
-- Select a colorization model from the sidebar
-- View the results with an interactive before/after slider
-- Download your colorized image
+This project is licensed under the MIT License - see the LICENSE file for details.
 
-## 🏋️‍♂️ Training a New Model
+## 🙏 Acknowledgments
 
-To train a custom **ResNet-based** colorization model:
+- **Zhang et al. (2016)** - "Colorful Image Colorization" for foundational research
+- **COCO Dataset** - Microsoft COCO: Common Objects in Context
+- **PyTorch Team** - For the deep learning framework
+- **University of Groningen** - Academic support and resources
 
-1. 📁 **Prepare your dataset** and place it under the `data/` directory.
+## 👥 Team
 
-2. ⚙️ **Update the configuration** file:
-   ```bash
-   src/configs/resnet_config.yaml
-   ```
-3. 🚀 **Run the training script**:
-   ```bash
-   python src/train.py
-   ```
-   
+- **Alexander Todorov** - Teaching Assistant & Student at UG
+- **Sven van Loon** - Docker Engineer & AI Student at UvA
+- **Mika Umaña** - Front End Engineer & AI Student at UG
+- **Christian Kobriger** - Data Science Student at ETH Zürich
+
+## 📚 References
+
+1. Zhang, Richard, Phillip Isola, and Alexei A. Efros. "Colorful image colorization." ECCV 2016.
+2. He, Kaiming, et al. "Deep residual learning for image recognition." CVPR 2016.
+3. Simonyan, Karen, and Andrew Zisserman. "Very deep convolutional networks for large-scale image recognition." ICLR 2015.
+4. Lin, Tsung-Yi, et al. "Microsoft COCO: Common objects in context." ECCV 2014.
+
+---
+
+**Made with ❤️ in Groningen, Netherlands**
