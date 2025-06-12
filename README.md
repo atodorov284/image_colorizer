@@ -90,11 +90,21 @@ Visit `http://localhost:3000` to access the application.
 
 
 ## 🖼️ Results Showcase
-| Original (Grayscale) | ResNet18 | VGG16 | VGG16 (Quantized) |
+| Original (Grayscale) | Target | Resnet | VGG16 |
 |:---:|:---:|:---:|:---:|
-| ![Original](web/public/image_ex6_o.jpeg) | ![ResNet Result](web/public/image_ex6_c.jpeg) | ![VGG Result](web/public/image_ex6_c.jpeg) | ![Quantized Result](web/public/image_ex6_c.jpeg) |
-| *Bean's Headshot* | *Baseline Model* | *Recommended* | *Optimized* |
+| ![Original](sample_images/image1/grayscale.png) | ![Target](sample_images/image1/original.png) | ![Resnet Result](sample_images/image1/resnet_prediction.png) | ![VGG Result](sample_images/image1/vgg_prediction.png) |
 
+| Original (Grayscale) | Target | Resnet | VGG16 |
+|:---:|:---:|:---:|:---:|
+| ![Original](sample_images/image2/grayscale.png) | ![Target](sample_images/image2/original.png) | ![Resnet Result](sample_images/image2/resnet_prediction.png) | ![VGG Result](sample_images/image2/vgg_prediction.png) |
+
+| Original (Grayscale) | Target | Resnet | VGG16 |
+|:---:|:---:|:---:|:---:|
+| ![Original](sample_images/image5/grayscale.png) | ![Target](sample_images/image5/original.png) | ![Resnet Result](sample_images/image5/resnet_prediction.png) | ![VGG Result](sample_images/image5/vgg_prediction.png) |
+
+| Original (Grayscale) | Target | Resnet | VGG16 |
+|:---:|:---:|:---:|:---:|
+| ![Original](sample_images/image7/grayscale.png) | ![Target](sample_images/image7/original.png) | ![Resnet Result](sample_images/image7/resnet_prediction.png) | ![VGG Result](sample_images/image7/vgg_prediction.png) |
 
 ### Model Performance Summary
 
